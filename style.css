@@ -8,7 +8,7 @@
 /* NAVBAR */
 .navbar{
     display: flex;
-    justify-content: center;
+    justify-content: left;
 }
 
 .navbar ul{
