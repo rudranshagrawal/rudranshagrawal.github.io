@@ -8,13 +8,24 @@
 /* NAVBAR */
 .navbar{
     display: flex;
-    justify-content: left;
+    justify-content: space-around;
 }
+
+.navbar div{
+    margin: 20px 0px
+}
+
+/* .navbar div a{
+    text-decoration: none;
+    color: black;
+    padding: 8px 25px;
+    transition: all .5s ease;
+} */
 
 .navbar ul{
     display: flex;
     list-style: none;
-    margin: 20px 0px;
+    margin: 40px 0px;
 }
 
 .navbar ul li{
@@ -37,18 +48,30 @@
     box-shadow: 0 0 10px black;
 }
 
+.home_logo{
+    height: 50px;
+    width: 50px;
+    /* padding: 8px 25px; */
+    transition: all .5s ease;
+}
+
+.home_logo:hover{
+    box-shadow: 0 0 10px black;
+}
+
+
 /* HOME SECTION */
 #home{
     display: flex;
     flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: black;
     height: 840px;
     justify-content: center;
     align-items: center;
     color: wheat;
 }
 
-#home::before{
+/* #home::before{
     content: "";
     position: absolute;
     top: 0;
@@ -59,7 +82,8 @@
     z-index: -1;
     opacity: .8;
 
-}
+} */
+
 
 .main{
     display: flex;
