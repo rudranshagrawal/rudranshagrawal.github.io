@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gold Price Tracker</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <header>
+      <h1>Gold Price Tracker</h1>
+      <nav>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Current Gold Price</h2>
+        <div id="goldPriceContainer">
+          <span id="goldPrice"></span>
+          <button id="refreshButton" onclick="getGoldPrice()">Refresh</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2023 Gold Price Tracker</p>
+    </footer>
+    
+    <script src="goldPrice.js"></script>
+  </body>
+</html>
