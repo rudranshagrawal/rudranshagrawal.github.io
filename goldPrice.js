@@ -14,3 +14,38 @@ function getGoldPrice() {
         console.error('Error fetching gold price:', error);
       });
   }
+
+  function createGoldChart() {
+    const canvas = document.getElementById("goldChart");
+  
+    fetch("https://www.goldapi.io/api/XAU/USD")
+      .then(response => response.json())
+      .then(data => {
+        const chart = new Chart(canvas, {
+          type: "line",
+          data: {
+            labels: data.prices.map(price => price.timestamp),
+            datasets: [
+              {
+                label: "Gold Price",
+                data: data.prices.map(price => price.price),
+                fill: false,
+                borderColor: "rgb(255, 165, 0)",
+                tension: 0.1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }
+              ]
+            }
+          }
+        });
+      });
+  }
