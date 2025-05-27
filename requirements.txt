@@ -1,5 +1,0 @@
-Requires:
-- Node.js v18+
-- npm
-Install with:
-  bash setup.sh
