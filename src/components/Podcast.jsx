@@ -100,17 +100,14 @@ export default function Podcast() {
           </div>
         </div>
 
-        {/* Spotify embed — auto-updates with new episodes */}
+        {/* Spotify embed — compact mode: player only, no episode thumbnails */}
         <div className="px-5 sm:px-7 pb-6">
-          <div className="text-[11px] text-fg-muted mb-3 prompt-comment">
-            latest episodes
-          </div>
           <div className="border border-line bg-bg-elev overflow-hidden">
             <iframe
               title="Embedded Edge on Spotify"
               src={EMBED_URL}
               width="100%"
-              height="352"
+              height="152"
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
