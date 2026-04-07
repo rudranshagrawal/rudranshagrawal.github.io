@@ -1,17 +1,25 @@
-import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
-import ProjectTerminal from '../components/ProjectTerminal';
-import Footer from '../components/Footer';
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
+import Projects from "../components/Projects";
+import Experience from "../components/Experience";
+import Skills from "../components/Skills";
+import Contact from "../components/Contact";
+import Footer from "../components/Footer";
+import TerminalEasterEgg from "../components/TerminalEasterEgg";
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <div className="pt-20">
+      <main>
         <Hero />
-        <ProjectTerminal />
-        <Footer />
-      </div>
+        <Projects />
+        <Experience />
+        <Skills />
+        <Contact />
+      </main>
+      <Footer />
+      <TerminalEasterEgg />
     </>
   );
 }

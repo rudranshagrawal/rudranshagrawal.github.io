@@ -1,35 +1,125 @@
-// src/components/Navbar.jsx
-import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from "react";
+
+const SECTIONS = [
+  { id: "work", label: "Work" },
+  { id: "experience", label: "Experience" },
+  { id: "skills", label: "Skills" },
+  { id: "contact", label: "Contact" },
+];
 
 export default function Navbar() {
-  const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState("work");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 12);
+
+      // active section detection
+      const offsets = SECTIONS.map((s) => {
+        const el = document.getElementById(s.id);
+        if (!el) return { id: s.id, top: Infinity };
+        return { id: s.id, top: el.getBoundingClientRect().top };
+      });
+      const current = offsets
+        .filter((o) => o.top < 140)
+        .sort((a, b) => b.top - a.top)[0];
+      if (current) setActive(current.id);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleNav = (id) => {
+    setMobileOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
-    <nav className="w-full px-6 py-4 flex justify-between items-center bg-black text-white shadow-md fixed top-0 left-0 z-50">
-      <Link to="/" className="text-xl font-bold text-yellow-400">
-        Rudransh.dev
-      </Link>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-paper-50/85 backdrop-blur-md border-b border-paper-200"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="container-page flex items-center justify-between py-4">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="font-serif text-lg font-medium tracking-tight text-ink-900 hover:text-amber transition"
+        >
+          Rudransh Agrawal
+        </button>
 
-      <div className="space-x-4">
-        <Link
-          to="/"
-          className={`hover:underline ${
-            pathname === '/' ? 'text-yellow-400 font-semibold' : 'text-gray-300'
-          }`}
+        <nav className="hidden md:flex items-center gap-1">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => handleNav(s.id)}
+              className={`px-3 py-1.5 rounded-full text-sm transition ${
+                active === s.id
+                  ? "text-ink-900 font-medium"
+                  : "text-ink-500 hover:text-ink-900"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="ml-2 pill-primary"
+          >
+            Resume
+          </a>
+        </nav>
+
+        <button
+          className="md:hidden p-2 -mr-2 text-ink-900"
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Toggle menu"
         >
-          Home
-        </Link>
-        <Link
-          to="/experience"
-          className={`hover:underline ${
-            pathname === '/experience'
-              ? 'text-yellow-400 font-semibold'
-              : 'text-gray-300'
-          }`}
-        >
-          Experience
-        </Link>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {mobileOpen ? (
+              <path d="M18 6 6 18M6 6l12 12" />
+            ) : (
+              <>
+                <path d="M3 6h18" />
+                <path d="M3 12h18" />
+                <path d="M3 18h18" />
+              </>
+            )}
+          </svg>
+        </button>
       </div>
-    </nav>
+
+      {mobileOpen && (
+        <div className="md:hidden border-t border-paper-200 bg-paper-50">
+          <div className="container-page py-3 flex flex-col gap-1">
+            {SECTIONS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => handleNav(s.id)}
+                className="text-left px-3 py-2 rounded-lg text-ink-700 hover:bg-paper-100"
+              >
+                {s.label}
+              </button>
+            ))}
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 pill-primary justify-center"
+            >
+              Resume
+            </a>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
