@@ -12,9 +12,6 @@ export default function Projects() {
     return PROJECTS.filter((p) => p.tags.includes(filter));
   }, [filter]);
 
-  const featured = filtered.filter((p) => p.featured);
-  const compact = filtered.filter((p) => !p.featured);
-
   return (
     <section id="work" className="container-page py-20 sm:py-24 scroll-mt-24">
       <div className="mb-10">
@@ -42,9 +39,9 @@ export default function Projects() {
       </div>
 
       <LayoutGroup>
-        {featured.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {featured.map((p) => (
+        {filtered.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filtered.map((p) => (
               <FeaturedCard
                 key={p.slug}
                 project={p}
@@ -66,24 +63,6 @@ export default function Projects() {
             />
           )}
         </AnimatePresence>
-
-        {compact.length > 0 && (
-          <div className="mt-12">
-            <div className="label mb-4 prompt-comment">embedded work</div>
-            <div className="border-y border-line divide-y divide-line">
-              {compact.map((p) => (
-                <CompactRow
-                  key={p.slug}
-                  project={p}
-                  open={openSlug === p.slug}
-                  onClick={() =>
-                    setOpenSlug(openSlug === p.slug ? null : p.slug)
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </LayoutGroup>
 
       {filtered.length === 0 && (
@@ -165,34 +144,3 @@ function FeaturedCard({ project, open, onClick }) {
   );
 }
 
-function CompactRow({ project, open, onClick }) {
-  return (
-    <motion.button
-      layout
-      onClick={onClick}
-      className="w-full text-left py-4 px-2 flex items-center justify-between gap-6 group hover:bg-bg-panel transition"
-      whileHover={{ x: 4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 26 }}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <span className="text-amber text-sm">$</span>
-          <h3 className="text-base text-fg group-hover:text-amber transition">
-            {project.name}
-          </h3>
-          <span className="text-xs text-fg-muted truncate">
-            {project.tagline}
-          </span>
-        </div>
-      </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="hidden sm:inline text-[10px] text-fg-faint">
-          {project.tech[0]}
-        </span>
-        <span className="text-fg-muted group-hover:text-amber text-xs">
-          {open ? "[ - ]" : "[ + ]"}
-        </span>
-      </div>
-    </motion.button>
-  );
-}
