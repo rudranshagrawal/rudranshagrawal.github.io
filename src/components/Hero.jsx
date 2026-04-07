@@ -47,7 +47,7 @@ export default function Hero() {
           custom={3}
           className="heading-display"
         >
-          Firmware engineer building the systems behind{" "}
+          Software engineer building the systems behind{" "}
           <span className="text-amber">AWS&apos;s GPU fleet</span>.
           <span className="caret" />
         </motion.h1>

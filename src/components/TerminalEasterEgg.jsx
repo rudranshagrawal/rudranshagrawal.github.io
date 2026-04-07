@@ -37,7 +37,7 @@ const HELP = `available commands:
 
 tip: tab completes · up/down arrows recall history`;
 
-const ABOUT = `rudransh agrawal — firmware engineer @ aws.
+const ABOUT = `rudransh agrawal — software engineer @ aws.
 
 working on bmc firmware for ec2 servers running amd and nvidia gpus
 out of cupertino. before aws, built can-based motor control firmware
