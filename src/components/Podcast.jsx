@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 const SHOW_ID = "67JPws1H3Uqhzi9GOuvXqI";
 const SHOW_URL = `https://open.spotify.com/show/${SHOW_ID}`;
 
@@ -99,7 +102,188 @@ export default function Podcast() {
           </div>
         </div>
 
+        <SuggestTopic />
       </div>
     </section>
+  );
+}
+
+function SuggestTopic() {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
+  const [topic, setTopic] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!topic.trim()) return;
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const data = new URLSearchParams();
+      data.append("form-name", "topic-suggestion");
+      data.append("topic", topic);
+      data.append("name", name);
+      data.append("email", email);
+
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: data.toString(),
+      });
+
+      if (!res.ok) throw new Error("submission failed");
+      setSubmitted(true);
+      setTopic("");
+      setName("");
+      setEmail("");
+    } catch (err) {
+      setError("something broke. try emailing me directly?");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-line">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full text-left px-5 sm:px-7 py-4 flex items-center justify-between text-sm text-fg-dim hover:text-amber transition group"
+      >
+        <span>
+          <span className="text-amber">$</span> got an embedded topic you want
+          covered?
+        </span>
+        <span className="text-fg-muted group-hover:text-amber text-xs">
+          {open ? "[ - ]" : "[ + suggest a topic ]"}
+        </span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 sm:px-7 pb-6">
+              {submitted ? (
+                <div className="border border-term-green/40 bg-term-green/5 p-5 text-sm">
+                  <div className="text-term-green flex items-center gap-2 mb-1">
+                    <span>✓</span>
+                    <span>topic received</span>
+                  </div>
+                  <div className="text-fg-dim">
+                    thanks for the idea — i read every one. you might just hear
+                    it on the show.
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                      setOpen(false);
+                    }}
+                    className="mt-3 text-[11px] text-fg-muted hover:text-amber"
+                  >
+                    [ submit another ]
+                  </button>
+                </div>
+              ) : (
+                <form
+                  name="topic-suggestion"
+                  method="POST"
+                  data-netlify="true"
+                  netlify-honeypot="bot-field"
+                  onSubmit={onSubmit}
+                  className="space-y-4"
+                >
+                  {/* Required hidden fields for Netlify */}
+                  <input
+                    type="hidden"
+                    name="form-name"
+                    value="topic-suggestion"
+                  />
+                  <p hidden>
+                    <label>
+                      don&apos;t fill this out:{" "}
+                      <input name="bot-field" />
+                    </label>
+                  </p>
+
+                  <div>
+                    <label className="block text-[11px] text-fg-muted mb-1.5">
+                      <span className="text-amber">&gt;</span> topic
+                      <span className="text-term-red ml-1">*</span>
+                    </label>
+                    <textarea
+                      name="topic"
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value)}
+                      required
+                      rows={3}
+                      placeholder="e.g. how do you debug i2c on a board with no logic analyzer?"
+                      className="w-full bg-bg-elev border border-line text-fg text-sm font-mono p-3 outline-none focus:border-amber transition placeholder:text-fg-faint resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] text-fg-muted mb-1.5">
+                        <span className="text-amber">&gt;</span> your name{" "}
+                        <span className="text-fg-faint">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="rudransh"
+                        className="w-full bg-bg-elev border border-line text-fg text-sm font-mono p-2.5 outline-none focus:border-amber transition placeholder:text-fg-faint"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-fg-muted mb-1.5">
+                        <span className="text-amber">&gt;</span> email{" "}
+                        <span className="text-fg-faint">(optional)</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full bg-bg-elev border border-line text-fg text-sm font-mono p-2.5 outline-none focus:border-amber transition placeholder:text-fg-faint"
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="text-xs text-term-red">{error}</div>
+                  )}
+
+                  <div className="flex items-center gap-3 pt-1">
+                    <button
+                      type="submit"
+                      disabled={submitting || !topic.trim()}
+                      className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {submitting ? "sending..." : "send topic"}
+                    </button>
+                    <span className="text-[11px] text-fg-muted">
+                      no spam. i&apos;ll only email if i need to follow up.
+                    </span>
+                  </div>
+                </form>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

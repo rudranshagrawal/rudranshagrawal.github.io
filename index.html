@@ -52,6 +52,23 @@
     />
   </head>
   <body>
+    <!--
+      Hidden form so Netlify's build-time form scanner picks up the
+      topic-suggestion form. The visible form is rendered by React in
+      src/components/Podcast.jsx and submitted via fetch.
+    -->
+    <form
+      name="topic-suggestion"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="text" name="topic" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="bot-field" />
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
