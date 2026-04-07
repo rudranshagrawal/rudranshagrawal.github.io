@@ -103,7 +103,7 @@ export default function TerminalEasterEgg() {
     return match ? match.slice(input.length) : "";
   }, [input]);
 
-  // Open / close keybindings
+  // Open / close keybindings + custom open-terminal event for buttons
   useEffect(() => {
     const onKey = (e) => {
       const tag = document.activeElement?.tagName;
@@ -115,8 +115,14 @@ export default function TerminalEasterEgg() {
         setOpen(false);
       }
     };
+    const onOpenEvent = () => setOpen(true);
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("open-terminal", onOpenEvent);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("open-terminal", onOpenEvent);
+    };
   }, [open]);
 
   useEffect(() => {

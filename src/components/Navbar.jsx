@@ -9,6 +9,35 @@ const SECTIONS = [
   { id: "contact", label: "contact" },
 ];
 
+function openTerminal() {
+  window.dispatchEvent(new CustomEvent("open-terminal"));
+}
+
+function TerminalButton({ className = "", showLabel = false }) {
+  return (
+    <button
+      onClick={openTerminal}
+      className={`text-fg-dim hover:text-amber transition flex items-center gap-1.5 text-sm ${className}`}
+      aria-label="open terminal"
+      title="open terminal"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="1" />
+        <path d="m7 9 3 3-3 3" />
+        <path d="M13 15h4" />
+      </svg>
+      {showLabel && <span>terminal</span>}
+    </button>
+  );
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("work");
@@ -46,10 +75,10 @@ export default function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <div className="container-page flex items-center justify-between py-4">
+      <div className="container-page flex items-center justify-between py-4 gap-3">
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="text-sm text-fg hover:text-amber transition flex items-center gap-2"
+          className="text-sm text-fg hover:text-amber transition flex items-center gap-2 shrink-0"
         >
           <span className="text-amber">~/</span>rudransh
           <span className="text-amber">$</span>
@@ -70,28 +99,34 @@ export default function Navbar() {
               {s.label}
             </button>
           ))}
-          <span className="ml-2 pl-3 border-l border-line">
+          <span className="ml-2 pl-3 border-l border-line flex items-center gap-3">
+            <TerminalButton />
             <ThemeToggle />
           </span>
         </nav>
 
-        <button
-          className="md:hidden p-2 -mr-2 text-fg"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label="toggle menu"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {mobileOpen ? (
-              <path d="M18 6 6 18M6 6l12 12" />
-            ) : (
-              <>
-                <path d="M3 6h18" />
-                <path d="M3 12h18" />
-                <path d="M3 18h18" />
-              </>
-            )}
-          </svg>
-        </button>
+        {/* Mobile right side: terminal button + hamburger */}
+        <div className="flex md:hidden items-center gap-1">
+          <TerminalButton className="p-2" />
+          <ThemeToggle className="p-2" />
+          <button
+            className="p-2 -mr-2 text-fg"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="toggle menu"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileOpen ? (
+                <path d="M18 6 6 18M6 6l12 12" />
+              ) : (
+                <>
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
@@ -107,9 +142,6 @@ export default function Navbar() {
                 {s.label}
               </button>
             ))}
-            <div className="px-3 py-2 border-t border-line mt-1">
-              <ThemeToggle />
-            </div>
           </div>
         </div>
       )}

@@ -1,16 +1,45 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { PROJECTS, FILTERS } from "../data/projects";
 import ProjectCaseStudy from "./ProjectCaseStudy";
 
+// Track viewport breakpoint (matches Tailwind's md: breakpoint)
+function useColumns() {
+  const [cols, setCols] = useState(() => {
+    if (typeof window === "undefined") return 2;
+    return window.matchMedia("(min-width: 768px)").matches ? 2 : 1;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const handler = (e) => setCols(e.matches ? 2 : 1);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return cols;
+}
+
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
 export default function Projects() {
   const [filter, setFilter] = useState("all");
   const [openSlug, setOpenSlug] = useState(null);
+  const cols = useColumns();
 
   const filtered = useMemo(() => {
     if (filter === "all") return PROJECTS;
     return PROJECTS.filter((p) => p.tags.includes(filter));
   }, [filter]);
+
+  const rows = useMemo(() => chunk(filtered, cols), [filtered, cols]);
+  const openProject = openSlug
+    ? PROJECTS.find((p) => p.slug === openSlug)
+    : null;
 
   return (
     <section id="work" className="container-page py-20 sm:py-24 scroll-mt-24">
@@ -39,30 +68,37 @@ export default function Projects() {
       </div>
 
       <LayoutGroup>
-        {filtered.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filtered.map((p) => (
-              <FeaturedCard
-                key={p.slug}
-                project={p}
-                open={openSlug === p.slug}
-                onClick={() =>
-                  setOpenSlug(openSlug === p.slug ? null : p.slug)
-                }
-              />
-            ))}
-          </div>
-        )}
+        <div className="space-y-4">
+          {rows.map((row, rowIdx) => {
+            const rowHasOpen = row.some((p) => p.slug === openSlug);
+            return (
+              <div key={`row-${rowIdx}-${cols}`} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {row.map((p) => (
+                    <FeaturedCard
+                      key={p.slug}
+                      project={p}
+                      open={openSlug === p.slug}
+                      onClick={() =>
+                        setOpenSlug(openSlug === p.slug ? null : p.slug)
+                      }
+                    />
+                  ))}
+                </div>
 
-        <AnimatePresence mode="wait">
-          {openSlug && (
-            <ProjectCaseStudy
-              key={openSlug}
-              project={PROJECTS.find((p) => p.slug === openSlug)}
-              onClose={() => setOpenSlug(null)}
-            />
-          )}
-        </AnimatePresence>
+                <AnimatePresence mode="wait">
+                  {rowHasOpen && openProject && (
+                    <ProjectCaseStudy
+                      key={openProject.slug}
+                      project={openProject}
+                      onClose={() => setOpenSlug(null)}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </LayoutGroup>
 
       {filtered.length === 0 && (
@@ -86,18 +122,9 @@ function FeaturedCard({ project, open, onClick }) {
       transition={{ type: "spring", stiffness: 300, damping: 26 }}
     >
       <div className="term-titlebar">
-        <span
-          className="term-dot"
-          style={{ background: "#f87171" }}
-        />
-        <span
-          className="term-dot"
-          style={{ background: "#fbbf24" }}
-        />
-        <span
-          className="term-dot"
-          style={{ background: "#34d399" }}
-        />
+        <span className="term-dot" style={{ background: "#f87171" }} />
+        <span className="term-dot" style={{ background: "#fbbf24" }} />
+        <span className="term-dot" style={{ background: "#34d399" }} />
         <span className="ml-3 text-[11px] text-fg-muted truncate">
           ~/projects/{project.slug}
         </span>
@@ -143,4 +170,3 @@ function FeaturedCard({ project, open, onClick }) {
     </motion.button>
   );
 }
-
