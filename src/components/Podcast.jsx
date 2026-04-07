@@ -1,6 +1,5 @@
 const SHOW_ID = "67JPws1H3Uqhzi9GOuvXqI";
 const SHOW_URL = `https://open.spotify.com/show/${SHOW_ID}`;
-const EMBED_URL = `https://open.spotify.com/embed/show/${SHOW_ID}?utm_source=generator&theme=0`;
 
 export default function Podcast() {
   return (
@@ -100,21 +99,6 @@ export default function Podcast() {
           </div>
         </div>
 
-        {/* Spotify embed — compact mode: player only, no episode thumbnails */}
-        <div className="px-5 sm:px-7 pb-6">
-          <div className="border border-line bg-bg-elev overflow-hidden">
-            <iframe
-              title="Embedded Edge on Spotify"
-              src={EMBED_URL}
-              width="100%"
-              height="152"
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ display: "block" }}
-            />
-          </div>
-        </div>
       </div>
     </section>
   );
