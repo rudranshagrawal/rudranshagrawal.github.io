@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 const SECTIONS = [
   { id: "work", label: "work" },
@@ -68,6 +69,9 @@ export default function Navbar() {
               {s.label}
             </button>
           ))}
+          <span className="ml-2 pl-3 border-l border-line">
+            <ThemeToggle />
+          </span>
         </nav>
 
         <button
@@ -102,6 +106,9 @@ export default function Navbar() {
                 {s.label}
               </button>
             ))}
+            <div className="px-3 py-2 border-t border-line mt-1">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       )}

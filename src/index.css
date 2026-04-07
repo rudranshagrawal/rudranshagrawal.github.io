@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme variables (RGB triplets so Tailwind alpha modifiers work) ─── */
+:root {
+  /* Default = dark warm terminal */
+  --color-bg:        9   9   11;
+  --color-bg-elev:   17  17  19;
+  --color-bg-panel:  22  22  24;
+  --color-bg-card:   26  26  29;
+
+  --color-line:        39  39  42;
+  --color-line-soft:   31  31  35;
+  --color-line-bright: 63  63  70;
+
+  --color-fg:        228 228 231;
+  --color-fg-dim:    161 161 170;
+  --color-fg-muted:  113 113 122;
+  --color-fg-faint:   82  82  91;
+
+  --color-amber:        251 191  36;
+  --color-amber-dim:    217 119   6;
+  --color-amber-bright: 253 224  71;
+
+  --color-term-green:  52 211 153;
+  --color-term-red:   248 113 113;
+  --color-term-yellow:251 191  36;
+  --color-term-blue:   96 165 250;
+  --color-term-purple:192 132 252;
+
+  --selection-bg: #fbbf24;
+  --selection-fg: #09090b;
+}
+
+.light {
+  /* Warm cream paper terminal */
+  --color-bg:        250 248 241;
+  --color-bg-elev:   243 241 232;
+  --color-bg-panel:  255 255 255;
+  --color-bg-card:   255 255 255;
+
+  --color-line:        226 223 211;
+  --color-line-soft:   236 233 221;
+  --color-line-bright: 200 196 179;
+
+  --color-fg:         28  28  28;
+  --color-fg-dim:     74  74  74;
+  --color-fg-muted:  111 111 111;
+  --color-fg-faint:  154 154 154;
+
+  --color-amber:        180  83   9;
+  --color-amber-dim:    146  64  14;
+  --color-amber-bright: 217 119   6;
+
+  --color-term-green:    4 120  87;
+  --color-term-red:    185  28  28;
+  --color-term-yellow: 180  83   9;
+  --color-term-blue:    29  78 216;
+  --color-term-purple: 126  34 206;
+
+  --selection-bg: #b45309;
+  --selection-fg: #faf8f1;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -17,14 +78,21 @@
       radial-gradient(at 18% 0%, rgba(251, 191, 36, 0.05) 0px, transparent 45%),
       radial-gradient(at 82% 100%, rgba(52, 211, 153, 0.03) 0px, transparent 45%);
     background-attachment: fixed;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .light body {
+    background-image:
+      radial-gradient(at 18% 0%, rgba(180, 83, 9, 0.06) 0px, transparent 45%),
+      radial-gradient(at 82% 100%, rgba(4, 120, 87, 0.04) 0px, transparent 45%);
   }
 
   ::selection {
-    background-color: #fbbf24;
-    color: #09090b;
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
   }
 
-  /* Subtle scanline texture for terminal feel */
+  /* Subtle scanlines (dark mode only) */
   body::before {
     content: "";
     position: fixed;
@@ -40,6 +108,9 @@
     z-index: 1;
     mix-blend-mode: overlay;
   }
+  .light body::before {
+    display: none;
+  }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
@@ -47,14 +118,14 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #09090b;
+    background: rgb(var(--color-bg));
   }
   ::-webkit-scrollbar-thumb {
-    background: #27272a;
+    background: rgb(var(--color-line));
     border-radius: 0;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3f3f46;
+    background: rgb(var(--color-line-bright));
   }
 }
 
@@ -68,12 +139,10 @@
     content: "$ ";
     @apply text-amber;
   }
-
   .prompt-arrow::before {
     content: "> ";
     @apply text-amber;
   }
-
   .prompt-comment::before {
     content: "// ";
     @apply text-fg-faint;
@@ -83,36 +152,16 @@
   .btn {
     @apply inline-flex items-center gap-2 border border-line bg-bg-panel px-4 py-2 text-sm text-fg transition hover:border-amber hover:text-amber;
   }
-
   .btn-primary {
     @apply inline-flex items-center gap-2 border border-amber bg-amber/10 px-4 py-2 text-sm text-amber transition hover:bg-amber hover:text-bg;
   }
+  .btn::before { content: "["; @apply text-fg-faint mr-0.5 transition; }
+  .btn::after  { content: "]"; @apply text-fg-faint ml-0.5 transition; }
+  .btn:hover::before, .btn:hover::after { @apply text-amber; }
 
-  .btn::before {
-    content: "[";
-    @apply text-fg-faint mr-0.5 transition;
-  }
-  .btn::after {
-    content: "]";
-    @apply text-fg-faint ml-0.5 transition;
-  }
-  .btn:hover::before,
-  .btn:hover::after {
-    @apply text-amber;
-  }
-
-  .btn-primary::before {
-    content: "[";
-    @apply text-amber mr-0.5 transition;
-  }
-  .btn-primary::after {
-    content: "]";
-    @apply text-amber ml-0.5 transition;
-  }
-  .btn-primary:hover::before,
-  .btn-primary:hover::after {
-    @apply text-bg;
-  }
+  .btn-primary::before { content: "["; @apply text-amber mr-0.5 transition; }
+  .btn-primary::after  { content: "]"; @apply text-amber ml-0.5 transition; }
+  .btn-primary:hover::before, .btn-primary:hover::after { @apply text-bg; }
 
   /* Filter chip */
   .chip {
@@ -127,7 +176,7 @@
     @apply border border-line bg-bg-panel p-6 transition hover:border-line-bright;
   }
 
-  /* Terminal window chrome (title bar with 3 dots) */
+  /* Terminal window chrome */
   .term-window {
     @apply border border-line bg-bg-panel overflow-hidden;
   }
