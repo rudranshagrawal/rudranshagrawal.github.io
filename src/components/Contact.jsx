@@ -2,47 +2,69 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="container-page py-20 sm:py-28 scroll-mt-24"
+      className="container-page py-20 sm:py-24 scroll-mt-24"
     >
-      <div className="rounded-3xl border border-paper-200 bg-white p-8 sm:p-14">
-        <div className="label mb-3">Contact</div>
-        <h2 className="heading-section text-ink-900 max-w-2xl">
-          If something here is interesting, I'd love to hear about it.
-        </h2>
-        <p className="mt-4 text-ink-600 max-w-xl leading-relaxed">
-          Best way to reach me is email. I read everything, even cold notes — especially if you're working on embedded systems, AI agents, or consumer health.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href="mailto:agraw115@purdue.edu" className="pill-primary">
-            agraw115@purdue.edu
-          </a>
-          <a
-            href="https://www.linkedin.com/in/rudranshagrawal"
-            target="_blank"
-            rel="noreferrer"
-            className="pill"
-          >
-            LinkedIn
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 17 17 7" />
-              <path d="M7 7h10v10" />
-            </svg>
-          </a>
-          <a href="/resume.pdf" target="_blank" rel="noreferrer" className="pill">
-            Résumé (PDF)
-          </a>
+      <div className="term-window">
+        <div className="term-titlebar">
+          <span className="term-dot" style={{ background: "#f87171" }} />
+          <span className="term-dot" style={{ background: "#fbbf24" }} />
+          <span className="term-dot" style={{ background: "#34d399" }} />
+          <span className="ml-3 text-[11px] text-fg-muted">~/contact</span>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-paper-200 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-500">
-          <span className="flex items-center gap-2">
-            <span className="pulse-dot" />
-            Cupertino, CA
-          </span>
-          <span>·</span>
-          <span>Open to interesting problems</span>
-          <span>·</span>
-          <span className="font-mono text-xs">Press ? for terminal</span>
+        <div className="p-6 sm:p-10">
+          <div className="label mb-2 prompt-comment">contact</div>
+          <h2 className="heading-section max-w-2xl">
+            <span className="text-amber">$</span> echo &quot;say hi&quot;
+          </h2>
+          <p className="mt-4 text-fg-dim text-sm max-w-xl leading-relaxed">
+            best way to reach me is email. i read everything, even cold notes —
+            especially if you&apos;re working on embedded systems, ai agents, or
+            consumer health.
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <a href="mailto:rudranshagrawal@yahoo.com" className="btn-primary">
+              rudranshagrawal@yahoo.com
+            </a>
+            <a
+              href="https://www.linkedin.com/in/rudranshagrawal"
+              target="_blank"
+              rel="noreferrer"
+              className="btn"
+            >
+              linkedin
+            </a>
+            <a
+              href="https://github.com/rudranshagrawal"
+              target="_blank"
+              rel="noreferrer"
+              className="btn"
+            >
+              github
+            </a>
+            <a
+              href="https://x.com/rudilicious99"
+              target="_blank"
+              rel="noreferrer"
+              className="btn"
+            >
+              x
+            </a>
+          </div>
+
+          <div className="mt-10 pt-6 border-t border-line flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-fg-muted">
+            <span className="flex items-center gap-2">
+              <span className="pulse-dot" />
+              cupertino, ca
+            </span>
+            <span>·</span>
+            <span>open to interesting problems</span>
+            <span>·</span>
+            <span>
+              press <kbd className="px-1 border border-line bg-bg-elev text-fg-dim">?</kbd> for terminal
+            </span>
+          </div>
         </div>
       </div>
     </section>

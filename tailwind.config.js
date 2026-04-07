@@ -4,34 +4,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: {
-          900: "#111111",
-          800: "#1c1c1c",
-          700: "#2a2a2a",
-          600: "#4a4a4a",
-          500: "#6b6b6b",
-          400: "#8a8a8a",
-          300: "#b8b5ad",
+        // Warm dark terminal palette
+        bg: {
+          DEFAULT: "#09090b", // zinc-950
+          elev: "#111113",
+          panel: "#161618",
+          card: "#1a1a1d",
         },
-        paper: {
-          50: "#fbfaf6",
-          100: "#f5f3ec",
-          200: "#ece9df",
-          300: "#ddd9cb",
+        line: {
+          DEFAULT: "#27272a", // zinc-800
+          soft: "#1f1f23",
+          bright: "#3f3f46",
+        },
+        fg: {
+          DEFAULT: "#e4e4e7", // zinc-200
+          dim: "#a1a1aa", // zinc-400
+          muted: "#71717a", // zinc-500
+          faint: "#52525b", // zinc-600
         },
         amber: {
-          DEFAULT: "#b45309",
-          soft: "#f3e9d5",
+          DEFAULT: "#fbbf24", // amber-400
+          dim: "#d97706",
+          bright: "#fde047",
+        },
+        term: {
+          green: "#34d399",
+          red: "#f87171",
+          yellow: "#fbbf24",
+          blue: "#60a5fa",
+          purple: "#c084fc",
         },
       },
       fontFamily: {
         sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          '"SF Pro Text"',
-          "Inter",
-          "system-ui",
-          "sans-serif",
+          '"JetBrains Mono"',
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
         ],
         mono: [
           '"JetBrains Mono"',
@@ -40,10 +50,18 @@ module.exports = {
           "Menlo",
           "monospace",
         ],
-        serif: ['"Fraunces"', '"Iowan Old Style"', "Georgia", "serif"],
       },
       maxWidth: {
-        prose: "68ch",
+        prose: "72ch",
+      },
+      keyframes: {
+        blink: {
+          "0%, 50%": { opacity: "1" },
+          "51%, 100%": { opacity: "0" },
+        },
+      },
+      animation: {
+        blink: "blink 1s step-end infinite",
       },
     },
   },

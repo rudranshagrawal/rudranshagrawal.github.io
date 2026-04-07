@@ -41,10 +41,10 @@ export const PROJECTS = [
   {
     slug: "heart-of-india",
     name: "Heart of India",
-    tagline: "Official iOS app for the Madhya Pradesh state tourism board.",
-    role: "Solo build · Government client work",
-    status: "In development with MP State Tourism",
-    tags: ["iOS", "Government"],
+    tagline: "Concept iOS travel app for Madhya Pradesh — built as a demo for the state government.",
+    role: "Solo build · Concept demo",
+    status: "Pitching to MP government",
+    tags: ["iOS"],
     tech: ["SwiftUI", "Supabase", "AI itinerary", "iOS"],
     link: {
       label: "github.com/rudranshagrawal/madhyapradeshtourism",
@@ -58,10 +58,10 @@ export const PROJECTS = [
       { src: "/projects/heart-of-india/plan.png", caption: "AI Trip Planner" },
       { src: "/projects/heart-of-india/book.png", caption: "Book a stay" },
     ],
-    problem: `Madhya Pradesh sits on some of the most extraordinary heritage in India — Sanchi, Khajuraho, the tiger reserves of Kanha and Bandhavgarh, palace stays, Narmada riverfronts — and almost none of it shows up in modern travel apps. International OTAs ignore it; domestic ones bury it. The state needed a flagship mobile experience that did justice to the place itself.`,
-    approach: `Photo-first, government-grade. Treat the app like a National Geographic feature, not a booking funnel. Let real photographs of MP carry the design, keep UI chrome minimal, use a deep forest-green identity tied to MP's natural heritage, and make the AI trip planner the killer feature — describe your dream trip in one sentence and get a full itinerary back.`,
+    problem: `Madhya Pradesh sits on some of the most extraordinary heritage in India — Sanchi, Khajuraho, the tiger reserves of Kanha and Bandhavgarh, palace stays, Narmada riverfronts — and almost none of it shows up in modern travel apps. International OTAs ignore it; domestic ones bury it. I wanted to build a concept app that did justice to the place itself, and pitch it to the state government as a flagship experience.`,
+    approach: `Photo-first, restraint-first. Treat the app like a National Geographic feature, not a booking funnel. Let real photographs of MP carry the design, keep UI chrome minimal, use a deep forest-green identity tied to MP's natural heritage, and make the AI trip planner the killer feature — describe your dream trip in one sentence and get a full itinerary back.`,
     architecture: `SwiftUI iOS app with five tabs (Discover, Book, Plan, Trips, Profile). Supabase backend for properties, safaris, and the Mrignayni handicraft catalog. The AI Trip Planner sends a structured prompt (duration, budget, trip style) to an LLM and parses the response into a day-by-day itinerary the user can save and modify. Wildlife lodges, heritage stays, temple towns, and highway retreats are modeled as first-class property categories.`,
-    result: `Five working tabs, AI itinerary generation live, ten properties seeded, and a visual identity the tourism board signed off on. Building toward a full launch with the Madhya Pradesh state government.`,
+    result: `Working five-tab demo: AI itinerary generation, properties seeded, full visual identity. Currently being shown to the Madhya Pradesh government as a pitch — not yet adopted.`,
   },
 
   {

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
 const SECTIONS = [
-  { id: "work", label: "Work" },
-  { id: "experience", label: "Experience" },
-  { id: "skills", label: "Skills" },
-  { id: "contact", label: "Contact" },
+  { id: "work", label: "work" },
+  { id: "experience", label: "experience" },
+  { id: "skills", label: "skills" },
+  { id: "contact", label: "contact" },
 ];
 
 export default function Navbar() {
@@ -15,8 +15,6 @@ export default function Navbar() {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 12);
-
-      // active section detection
       const offsets = SECTIONS.map((s) => {
         const el = document.getElementById(s.id);
         if (!el) return { id: s.id, top: Infinity };
@@ -42,46 +40,40 @@ export default function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-paper-50/85 backdrop-blur-md border-b border-paper-200"
+          ? "bg-bg/85 backdrop-blur-md border-b border-line"
           : "bg-transparent"
       }`}
     >
       <div className="container-page flex items-center justify-between py-4">
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="font-serif text-lg font-medium tracking-tight text-ink-900 hover:text-amber transition"
+          className="text-sm text-fg hover:text-amber transition flex items-center gap-2"
         >
-          Rudransh Agrawal
+          <span className="text-amber">~/</span>rudransh
+          <span className="text-amber">$</span>
         </button>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1 text-sm">
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => handleNav(s.id)}
-              className={`px-3 py-1.5 rounded-full text-sm transition ${
+              className={`px-3 py-1.5 transition ${
                 active === s.id
-                  ? "text-ink-900 font-medium"
-                  : "text-ink-500 hover:text-ink-900"
+                  ? "text-amber"
+                  : "text-fg-dim hover:text-fg"
               }`}
             >
+              {active === s.id && <span className="text-amber">&gt; </span>}
               {s.label}
             </button>
           ))}
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noreferrer"
-            className="ml-2 pill-primary"
-          >
-            Resume
-          </a>
         </nav>
 
         <button
-          className="md:hidden p-2 -mr-2 text-ink-900"
+          className="md:hidden p-2 -mr-2 text-fg"
           onClick={() => setMobileOpen((v) => !v)}
-          aria-label="Toggle menu"
+          aria-label="toggle menu"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {mobileOpen ? (
@@ -98,25 +90,18 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-paper-200 bg-paper-50">
-          <div className="container-page py-3 flex flex-col gap-1">
+        <div className="md:hidden border-t border-line bg-bg">
+          <div className="container-page py-3 flex flex-col gap-1 text-sm">
             {SECTIONS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => handleNav(s.id)}
-                className="text-left px-3 py-2 rounded-lg text-ink-700 hover:bg-paper-100"
+                className="text-left px-3 py-2 text-fg-dim hover:text-amber"
               >
+                <span className="text-amber">&gt; </span>
                 {s.label}
               </button>
             ))}
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 pill-primary justify-center"
-            >
-              Resume
-            </a>
           </div>
         </div>
       )}

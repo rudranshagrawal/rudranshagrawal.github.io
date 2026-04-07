@@ -2,10 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 const TABS = [
-  { id: "problem", label: "Problem" },
-  { id: "approach", label: "Approach" },
-  { id: "architecture", label: "Architecture" },
-  { id: "result", label: "Result" },
+  { id: "problem", label: "problem" },
+  { id: "approach", label: "approach" },
+  { id: "architecture", label: "architecture" },
+  { id: "result", label: "result" },
 ];
 
 export default function ProjectCaseStudy({ project, onClose }) {
@@ -20,47 +20,55 @@ export default function ProjectCaseStudy({ project, onClose }) {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="overflow-hidden"
     >
-      <div className="mt-2 mb-6 rounded-2xl border border-ink-900 bg-white">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 p-6 sm:p-8 border-b border-paper-200">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ background: project.accent || "#b45309" }}
-              />
-              <span className="label">{project.role}</span>
-            </div>
-            <h3 className="font-serif text-3xl sm:text-4xl text-ink-900">
-              {project.name}
-            </h3>
-            <p className="mt-2 text-ink-600 max-w-2xl">{project.tagline}</p>
-            <div className="mt-3 flex items-center gap-2 text-xs text-ink-500">
-              <span className="inline-block h-1 w-1 rounded-full bg-emerald-500" />
-              {project.status}
-            </div>
-          </div>
+      <div className="my-4 term-window border-amber">
+        <div className="term-titlebar border-b-amber/40">
+          <span className="term-dot" style={{ background: "#f87171" }} />
+          <span className="term-dot" style={{ background: "#fbbf24" }} />
+          <span className="term-dot" style={{ background: "#34d399" }} />
+          <span className="ml-3 text-[11px] text-fg-muted truncate">
+            ~/projects/{project.slug} — case study
+          </span>
           <button
             onClick={onClose}
-            className="text-ink-400 hover:text-ink-900 transition shrink-0"
-            aria-label="Close case study"
+            className="ml-auto text-fg-muted hover:text-amber text-xs"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+            [ esc ]
           </button>
+        </div>
+
+        {/* Header */}
+        <div className="px-5 sm:px-7 pt-6 pb-5 border-b border-line">
+          <div className="flex items-center gap-2 mb-2 text-[11px] text-fg-muted">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: project.accent || "#fbbf24" }}
+            />
+            {project.role}
+          </div>
+          <h3 className="text-2xl sm:text-3xl text-fg">
+            <span className="text-amber">$ </span>
+            {project.name}
+          </h3>
+          <p className="mt-2 text-fg-dim text-sm max-w-2xl">{project.tagline}</p>
+          <div className="mt-3 flex items-center gap-2 text-xs text-fg-muted">
+            <span className="pulse-dot" />
+            {project.status}
+          </div>
         </div>
 
         {/* Image gallery */}
         {project.images && project.images.length > 0 && (
-          <div className="px-6 sm:px-8 pt-6">
-            <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 sm:-mx-8 px-6 sm:px-8 snap-x snap-mandatory">
+          <div className="px-5 sm:px-7 pt-6">
+            <div className="text-[11px] text-fg-muted mb-3 prompt-comment">
+              screenshots
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-3 -mx-5 sm:-mx-7 px-5 sm:px-7 snap-x snap-mandatory">
               {project.images.map((img) => (
                 <figure
                   key={img.src}
-                  className="shrink-0 snap-start w-[200px] sm:w-[220px]"
+                  className="shrink-0 snap-start w-[180px] sm:w-[200px]"
                 >
-                  <div className="rounded-xl border border-paper-200 bg-paper-100 overflow-hidden aspect-[9/19]">
+                  <div className="border border-line bg-bg-elev overflow-hidden aspect-[9/19]">
                     <img
                       src={img.src}
                       alt={img.caption}
@@ -68,12 +76,12 @@ export default function ProjectCaseStudy({ project, onClose }) {
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                         e.currentTarget.parentElement.innerHTML =
-                          '<div class="h-full w-full flex items-center justify-center text-xs text-ink-400 p-4 text-center">Screenshot coming soon</div>';
+                          '<div class="h-full w-full flex items-center justify-center text-[10px] text-fg-muted p-4 text-center">screenshot pending</div>';
                       }}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <figcaption className="mt-2 text-xs text-ink-500">
+                  <figcaption className="mt-2 text-[10px] text-fg-muted">
                     {img.caption}
                   </figcaption>
                 </figure>
@@ -83,18 +91,19 @@ export default function ProjectCaseStudy({ project, onClose }) {
         )}
 
         {/* Tabs */}
-        <div className="px-6 sm:px-8 pt-6">
-          <div className="flex gap-1 border-b border-paper-200 -mb-px overflow-x-auto">
+        <div className="px-5 sm:px-7 pt-4">
+          <div className="flex gap-1 border-b border-line -mb-px overflow-x-auto text-sm">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`px-4 py-2.5 text-sm transition border-b-2 whitespace-nowrap ${
+                className={`px-3 py-2 transition border-b-2 whitespace-nowrap ${
                   tab === t.id
-                    ? "border-ink-900 text-ink-900 font-medium"
-                    : "border-transparent text-ink-500 hover:text-ink-900"
+                    ? "border-amber text-amber"
+                    : "border-transparent text-fg-muted hover:text-fg"
                 }`}
               >
+                {tab === t.id && <span className="text-amber">&gt; </span>}
                 {t.label}
               </button>
             ))}
@@ -102,25 +111,24 @@ export default function ProjectCaseStudy({ project, onClose }) {
         </div>
 
         {/* Body */}
-        <div className="px-6 sm:px-8 py-6 sm:py-8">
+        <div className="px-5 sm:px-7 py-6">
           <motion.p
             key={tab}
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            className="text-ink-700 leading-relaxed max-w-prose"
+            className="text-fg-dim leading-relaxed text-sm max-w-prose"
           >
             {project[tab]}
           </motion.p>
 
-          {/* Tech tags */}
-          <div className="mt-8 pt-6 border-t border-paper-200">
-            <div className="label mb-3">Stack</div>
+          <div className="mt-8 pt-5 border-t border-line">
+            <div className="label mb-3 prompt-comment">stack</div>
             <div className="flex flex-wrap gap-1.5">
               {project.tech.map((t) => (
                 <span
                   key={t}
-                  className="font-mono text-[11px] text-ink-600 px-2 py-1 rounded bg-paper-100"
+                  className="text-[11px] text-fg-dim px-2 py-1 border border-line bg-bg-elev"
                 >
                   {t}
                 </span>
@@ -129,18 +137,14 @@ export default function ProjectCaseStudy({ project, onClose }) {
           </div>
 
           {project.link && (
-            <div className="mt-6">
+            <div className="mt-5">
               <a
                 href={project.link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="pill"
+                className="btn"
               >
-                {project.link.label}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M7 17 17 7" />
-                  <path d="M7 7h10v10" />
-                </svg>
+                {project.link.label} →
               </a>
             </div>
           )}
