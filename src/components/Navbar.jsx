@@ -4,6 +4,7 @@ import ThemeToggle from "./ThemeToggle";
 const SECTIONS = [
   { id: "work", label: "work" },
   { id: "experience", label: "experience" },
+  { id: "podcast", label: "podcast" },
   { id: "skills", label: "skills" },
   { id: "contact", label: "contact" },
 ];

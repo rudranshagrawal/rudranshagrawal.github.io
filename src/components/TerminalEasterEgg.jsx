@@ -12,6 +12,7 @@ const COMMANDS = [
   "cat about",
   "cat experience",
   "contact",
+  "podcast",
   "clear",
   "exit",
   "date",
@@ -29,6 +30,7 @@ const HELP = `available commands:
   open <project>    show project blurb
   cat about         a few sentences about me
   cat experience    short work history
+  podcast           open embedded edge on spotify
   contact           how to reach me
   date              show current date
   echo <text>       print text
@@ -179,6 +181,21 @@ export default function TerminalEasterEgg() {
       return print(
         "rudranshagrawal@yahoo.com\nlinkedin.com/in/rudranshagrawal\ngithub.com/rudranshagrawal\nx.com/rudilicious99"
       );
+    if (cmd === "podcast") {
+      print(
+        "embedded edge — conversations about firmware engineering\nopening spotify in a new tab..."
+      );
+      setTimeout(
+        () =>
+          window.open(
+            "https://open.spotify.com/show/67JPws1H3Uqhzi9GOuvXqI",
+            "_blank",
+            "noopener,noreferrer"
+          ),
+        300
+      );
+      return;
+    }
     if (cmd === "date")
       return print(new Date().toString().toLowerCase());
     if (cmd.startsWith("echo ")) return print(cmd.slice(5));
