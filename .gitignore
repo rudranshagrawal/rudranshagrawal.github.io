@@ -1,9 +1,15 @@
 # Node dependencies
 node_modules/
 .env
+.env.local
+.env.*.local
 
 # Build output
 dist/
+
+# Fitness dashboard — plaintext plan data (NEVER commit)
+src/data/fit-plan.source.js
+src/data/fit-plan.source.mjs
 
 # Logs
 npm-debug.log*

@@ -4,10 +4,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "encrypt-plan": "node scripts/encrypt-plan.mjs"
   },
   "dependencies": {
     "framer-motion": "^10.12.16",
+    "openai": "^6.34.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
