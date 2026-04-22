@@ -6,6 +6,7 @@ import { getMealLog } from "../../lib/storage";
 export default function DietTab({ plan, setActiveTab }) {
   const iso = todayISO();
   const [logs, setLogs] = useState(() => getMealLog(iso));
+  const [groceryOpen, setGroceryOpen] = useState(false);
 
   const refresh = useCallback(() => {
     setLogs(getMealLog(iso));
@@ -14,16 +15,18 @@ export default function DietTab({ plan, setActiveTab }) {
   const askAI = useCallback(
     (meal) => {
       try {
-        const primed = {
-          kind: "meal-context",
-          mealId: meal.id,
-          mealTitle: meal.title,
-          window: meal.window,
-          ingredients: meal.ingredients,
-          macros: plan.meta?.macros,
-          ts: Date.now(),
-        };
-        sessionStorage.setItem("fit-coach-primed", JSON.stringify(primed));
+        sessionStorage.setItem(
+          "fit-coach-primed",
+          JSON.stringify({
+            kind: "meal-context",
+            mealId: meal.id,
+            mealTitle: meal.title,
+            window: meal.window,
+            ingredients: meal.ingredients,
+            macros: plan.meta?.macros,
+            ts: Date.now(),
+          })
+        );
       } catch {}
       setActiveTab("coach");
     },
@@ -31,23 +34,17 @@ export default function DietTab({ plan, setActiveTab }) {
   );
 
   return (
-    <div className="px-4 py-4">
-      <div className="mb-4">
-        <div className="text-[11px] text-fg-muted uppercase tracking-wider">
-          diet plan
-        </div>
-        <h1 className="text-xl text-fg mt-1">
-          <span className="text-amber">$</span> meals + macros
-        </h1>
-      </div>
-
-      {/* Macros summary */}
+    <div className="max-w-lg mx-auto px-5 py-5 space-y-4">
+      {/* Macros hero */}
       {plan.meta?.macros && (
-        <div className="grid grid-cols-4 gap-2 text-center mb-5">
-          <Macro label="kcal" value={plan.meta.macros.caloriesKcal} />
-          <Macro label="prot" value={`${plan.meta.macros.proteinG}g`} />
-          <Macro label="carb" value={`${plan.meta.macros.carbsG}g`} />
-          <Macro label="fat" value={`${plan.meta.macros.fatsG}g`} />
+        <div className="fit-card p-5">
+          <div className="fit-label mb-3">Daily targets</div>
+          <div className="grid grid-cols-4 gap-3">
+            <Macro label="kcal" value={plan.meta.macros.caloriesKcal} />
+            <Macro label="protein" value={`${plan.meta.macros.proteinG}g`} />
+            <Macro label="carbs" value={`${plan.meta.macros.carbsG}g`} />
+            <Macro label="fat" value={`${plan.meta.macros.fatsG}g`} />
+          </div>
         </div>
       )}
 
@@ -67,20 +64,33 @@ export default function DietTab({ plan, setActiveTab }) {
 
       {/* Grocery list */}
       {plan.groceries?.length > 0 && (
-        <div className="mt-8 card">
-          <div className="text-[11px] text-fg-muted uppercase tracking-wider mb-3">
-            grocery list
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {plan.groceries.map((g) => (
-              <span
-                key={g}
-                className="text-[11px] text-fg-dim px-2 py-1 border border-line bg-bg-elev"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
+        <div className="fit-card overflow-hidden">
+          <button
+            onClick={() => setGroceryOpen((v) => !v)}
+            className="w-full min-h-[56px] flex items-center justify-between px-5 py-3 active:bg-bg-elev transition text-left"
+          >
+            <div>
+              <div className="fit-label">Grocery list</div>
+              <div className="text-sm text-fg mt-0.5">
+                {plan.groceries.length} items
+              </div>
+            </div>
+            <Chevron open={groceryOpen} />
+          </button>
+          {groceryOpen && (
+            <div className="border-t border-line-soft p-5">
+              <div className="flex flex-wrap gap-1.5">
+                {plan.groceries.map((g) => (
+                  <span
+                    key={g}
+                    className="text-xs text-fg-dim px-3 py-1.5 rounded-full bg-bg-elev"
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -89,9 +99,29 @@ export default function DietTab({ plan, setActiveTab }) {
 
 function Macro({ label, value }) {
   return (
-    <div className="border border-line bg-bg-panel p-2">
-      <div className="text-sm text-fg tabular-nums">{value}</div>
-      <div className="text-[9px] text-fg-muted uppercase mt-0.5">{label}</div>
+    <div className="text-center">
+      <div className="text-base font-semibold tabular-nums text-fg">{value}</div>
+      <div className="text-[10px] text-fg-muted uppercase tracking-wider mt-0.5">
+        {label}
+      </div>
     </div>
+  );
+}
+
+function Chevron({ open }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`text-fg-muted shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }

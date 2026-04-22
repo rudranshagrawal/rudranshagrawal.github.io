@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getPrefs, setPrefs, logout, exportAll, importAll } from "../../lib/storage";
+import {
+  getPrefs,
+  setPrefs,
+  logout,
+  exportAll,
+  importAll,
+} from "../../lib/storage";
 
 export default function SettingsSheet({ onClose, onLogout }) {
   const [prefs, setLocal] = useState(() => getPrefs());
   const [status, setStatus] = useState("");
   const fileRef = useRef(null);
 
-  // Lock body scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -34,7 +39,7 @@ export default function SettingsSheet({ onClose, onLogout }) {
     a.download = `fitness-backup-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setStatus("exported");
+    setStatus("Exported");
     setTimeout(() => setStatus(""), 2000);
   };
 
@@ -45,10 +50,10 @@ export default function SettingsSheet({ onClose, onLogout }) {
       const text = await file.text();
       const data = JSON.parse(text);
       importAll(data);
-      setStatus("imported — reload to see changes");
-      setTimeout(() => window.location.reload(), 1500);
+      setStatus("Imported — reloading…");
+      setTimeout(() => window.location.reload(), 1200);
     } catch {
-      setStatus("import failed — invalid file");
+      setStatus("Import failed — invalid file");
     }
   };
 
@@ -64,7 +69,7 @@ export default function SettingsSheet({ onClose, onLogout }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-50 bg-bg/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       >
         <motion.div
@@ -72,73 +77,75 @@ export default function SettingsSheet({ onClose, onLogout }) {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="absolute bottom-0 left-0 right-0 bg-bg border-t border-amber max-h-[88vh] overflow-y-auto"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          className="absolute bottom-0 left-0 right-0 bg-bg rounded-t-3xl max-h-[88vh] overflow-y-auto"
+          style={{
+            paddingBottom: "env(safe-area-inset-bottom)",
+            boxShadow: "0 -8px 24px rgba(31, 31, 31, 0.1)",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Grab handle */}
           <div className="flex justify-center pt-2 pb-1">
             <div className="h-1 w-10 rounded-full bg-line-bright" />
           </div>
 
-          <div className="px-5 pb-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg text-fg">
-                <span className="text-amber">$</span> settings
-              </h2>
+          <div className="px-5 pb-6 max-w-lg mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-fg">Settings</h2>
               <button
                 onClick={onClose}
-                className="h-10 w-10 flex items-center justify-center text-fg-muted active:scale-95"
+                className="h-10 w-10 flex items-center justify-center text-fg-muted active:scale-95 rounded-full"
                 aria-label="close"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <Row label="coach whatsapp number">
+            <Row label="Coach WhatsApp">
               <input
                 type="tel"
                 inputMode="tel"
                 placeholder="+91 98765 43210"
                 value={prefs.coachWhatsApp || ""}
                 onChange={(e) => save({ coachWhatsApp: e.target.value })}
-                className="w-full bg-bg-elev border border-line text-fg font-mono text-sm p-3 outline-none focus:border-amber transition"
+                className="fit-input"
               />
-              <p className="mt-1 text-[10px] text-fg-faint">
-                include country code (e.g. +91 for india).
+              <p className="mt-1.5 text-xs text-fg-muted">
+                Include country code. Used for weekly check-in messages.
               </p>
             </Row>
 
-            <Row label="default rest timer">
+            <Row label="Default rest timer">
               <div className="flex gap-2">
                 {[60, 90, 120, 180].map((s) => (
                   <button
                     key={s}
                     onClick={() => save({ restTimerSec: s })}
-                    className={`flex-1 min-h-[48px] border text-sm transition ${
+                    className={`flex-1 min-h-[48px] rounded-full text-sm font-medium transition active:scale-95 ${
                       prefs.restTimerSec === s
-                        ? "border-amber bg-amber text-bg"
-                        : "border-line text-fg-dim active:scale-95"
+                        ? "bg-amber text-white"
+                        : "bg-white border border-line text-fg-dim"
                     }`}
                   >
-                    {s < 60 ? `${s}s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`}
+                    {s < 60
+                      ? `${s}s`
+                      : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`}
                   </button>
                 ))}
               </div>
             </Row>
 
-            <Row label="data backup">
+            <Row label="Data backup">
               <div className="flex gap-2 flex-wrap">
-                <button onClick={handleExport} className="btn flex-1 justify-center">
-                  export json
+                <button onClick={handleExport} className="fit-btn flex-1">
+                  Export JSON
                 </button>
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="btn flex-1 justify-center"
+                  className="fit-btn flex-1"
                 >
-                  import json
+                  Import JSON
                 </button>
                 <input
                   ref={fileRef}
@@ -148,32 +155,35 @@ export default function SettingsSheet({ onClose, onLogout }) {
                   className="hidden"
                 />
               </div>
-              <p className="mt-2 text-[10px] text-fg-faint">
-                back up before clearing browser data. import overwrites all
-                current fit-* data.
+              <p className="mt-2 text-xs text-fg-muted">
+                Back up before clearing browser data. Import overwrites all
+                current dashboard data.
               </p>
               {status && (
-                <div className="mt-2 text-[11px] text-term-green">{status}</div>
+                <div className="mt-2 text-sm text-term-green font-medium">
+                  {status}
+                </div>
               )}
             </Row>
 
-            <Row label="session">
+            <Row label="Session">
               <button
                 onClick={handleLogout}
-                className="btn w-full justify-center border-term-red/40 text-term-red hover:border-term-red hover:text-term-red"
+                className="fit-btn-danger w-full"
               >
-                log out of this device
+                Log out of this device
               </button>
-              <p className="mt-2 text-[10px] text-fg-faint">
-                clears the cached decryption key. you&apos;ll enter your password
-                next time you open <code className="text-amber">/fitness</code>.
+              <p className="mt-2 text-xs text-fg-muted">
+                Clears the cached decryption key. You&apos;ll enter your
+                password next time you open /fitness.
               </p>
             </Row>
 
-            <div className="mt-6 pt-4 border-t border-line text-[10px] text-fg-faint">
-              tip: sign into youtube premium in this browser for ad-free
-              exercise demos. if ads still appear on ios, disable &quot;prevent
-              cross-site tracking&quot; for this site.
+            <div className="mt-6 pt-5 border-t border-line-soft text-xs text-fg-muted leading-relaxed">
+              <strong className="text-fg-dim">YouTube tip:</strong> sign into
+              YouTube Premium in this browser for ad-free exercise demos. On
+              iOS, if ads still appear, disable &ldquo;Prevent Cross-Site
+              Tracking&rdquo; for this site in Safari settings.
             </div>
           </div>
         </motion.div>
@@ -185,9 +195,7 @@ export default function SettingsSheet({ onClose, onLogout }) {
 function Row({ label, children }) {
   return (
     <div className="mb-6">
-      <label className="text-[11px] text-fg-muted block mb-2 uppercase tracking-wider">
-        <span className="text-fg-faint">//</span> {label}
-      </label>
+      <label className="fit-label block mb-2">{label}</label>
       {children}
     </div>
   );

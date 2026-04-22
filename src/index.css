@@ -216,3 +216,123 @@
     @apply inline-block w-[0.55em] h-[1em] bg-amber align-middle ml-1 animate-blink;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────── */
+/*   .fit-theme — scoped paper palette for the /fitness dashboard.         */
+/*   Completely isolated from the portfolio's terminal aesthetic.          */
+/* ─────────────────────────────────────────────────────────────────────── */
+
+.fit-theme {
+  /* Paper whites + warm beige */
+  --color-bg:        254 253 249;   /* #FEFDF9 warm white */
+  --color-bg-elev:   247 243 234;   /* #F7F3EA pale beige */
+  --color-bg-panel:  255 255 255;   /* #FFFFFF */
+  --color-bg-card:   255 255 255;   /* #FFFFFF */
+
+  --color-line:        229 224 213; /* #E5E0D5 warm gray */
+  --color-line-soft:   240 235 225; /* #F0EBE1 */
+  --color-line-bright: 199 192 178; /* #C7C0B2 */
+
+  --color-fg:         31  31  31;   /* #1F1F1F charcoal */
+  --color-fg-dim:     90  87  84;   /* #5A5754 */
+  --color-fg-muted:  139 134 128;   /* #8B8680 */
+  --color-fg-faint:  173 168 161;   /* #ADA8A1 */
+
+  /* Repurpose amber → sage green (the fitness accent) */
+  --color-amber:         74 127 106;  /* #4A7F6A sage */
+  --color-amber-dim:     45  95  74;  /* #2D5F4A deep sage */
+  --color-amber-bright: 103 150 129;  /* #679681 light sage */
+
+  --color-term-green: 74 127 106;   /* same as accent */
+  --color-term-red:  184  99  62;   /* #B8633E terracotta */
+  --color-term-yellow: 184  99  62;
+  --color-term-blue:  102 128 160;
+  --color-term-purple:142 112 148;
+
+  --selection-bg: #E8F1ED;
+  --selection-fg: #1F1F1F;
+
+  /* No mono default inside fit-theme */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  color: rgb(var(--color-fg));
+  background-color: rgb(var(--color-bg));
+}
+
+/* Kill terminal-only decorations inside fit-theme */
+.fit-theme::before,
+.fit-theme .prompt::before,
+.fit-theme .prompt-arrow::before,
+.fit-theme .prompt-comment::before {
+  content: none !important;
+}
+
+/* fit-theme scrollbars — light, minimal */
+.fit-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.fit-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.fit-theme ::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-line-bright));
+  border-radius: 999px;
+}
+
+/* ─── Fit-theme component classes ─── */
+@layer components {
+  .fit-card {
+    @apply bg-white rounded-2xl border border-line;
+    box-shadow: 0 1px 2px rgba(31, 31, 31, 0.03);
+  }
+
+  .fit-card-elevated {
+    @apply bg-white rounded-2xl;
+    box-shadow: 0 2px 8px rgba(31, 31, 31, 0.05), 0 1px 2px rgba(31, 31, 31, 0.04);
+  }
+
+  .fit-btn {
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[48px] px-5 rounded-full border border-line bg-white text-fg text-sm font-medium transition active:scale-[0.97];
+  }
+
+  .fit-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[48px] px-5 rounded-full bg-amber text-white text-sm font-medium transition active:scale-[0.97];
+    box-shadow: 0 1px 3px rgba(74, 127, 106, 0.3);
+  }
+
+  .fit-btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[44px] px-4 rounded-full text-fg-dim text-sm font-medium transition active:scale-[0.97] hover:text-amber;
+  }
+
+  .fit-btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[48px] px-5 rounded-full border border-term-red text-term-red text-sm font-medium transition active:scale-[0.97];
+  }
+
+  .fit-input {
+    @apply w-full bg-bg-elev border border-line rounded-xl text-fg text-base p-3 outline-none transition focus:border-amber focus:bg-white;
+  }
+
+  .fit-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs text-fg-dim transition active:scale-[0.97];
+  }
+  .fit-chip-active {
+    @apply border-amber bg-amber text-white;
+  }
+
+  .fit-label {
+    @apply text-[11px] uppercase tracking-[0.12em] text-fg-muted font-medium;
+  }
+
+  .fit-section-title {
+    @apply text-2xl font-semibold tracking-tight text-fg;
+  }
+
+  .fit-stat-num {
+    @apply text-2xl font-semibold tracking-tight tabular-nums text-fg;
+  }
+
+  .fit-divider {
+    @apply border-t border-line-soft my-2;
+  }
+}
+

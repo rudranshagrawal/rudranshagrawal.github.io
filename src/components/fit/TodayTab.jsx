@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { dayOfWeek, todayISO, weekNumber, prettyDate } from "../../lib/fitness-format";
+import {
+  dayOfWeek,
+  todayISO,
+  weekNumber,
+  prettyDate,
+} from "../../lib/fitness-format";
 import { addWeight, getWeightLog, getMealLog } from "../../lib/storage";
 import { success } from "../../lib/haptics";
 
@@ -11,7 +16,7 @@ export default function TodayTab({ plan, setActiveTab }) {
 
   const [weight, setWeight] = useState("");
   const [weightSaved, setWeightSaved] = useState(false);
-  const [todayWeightLog, setTodayWeightLog] = useState(() =>
+  const [todayWeight, setTodayWeight] = useState(() =>
     getWeightLog().find((w) => w.date === iso)
   );
   const [todayMeals, setTodayMeals] = useState(() => getMealLog(iso));
@@ -25,36 +30,45 @@ export default function TodayTab({ plan, setActiveTab }) {
     const kg = parseFloat(weight);
     if (!kg || kg < 30 || kg > 300) return;
     addWeight(iso, kg);
-    setTodayWeightLog({ date: iso, kg });
+    setTodayWeight({ date: iso, kg });
     setWeight("");
     setWeightSaved(true);
     success();
     setTimeout(() => setWeightSaved(false), 2000);
   };
 
+  const mealsDone = todayMeals.length;
+  const mealsTotal = plan.meals?.length ?? 0;
+
   return (
-    <div className="px-4 py-4">
-      {/* Header */}
-      <div className="mb-5">
-        <div className="text-[11px] text-fg-muted uppercase tracking-wider">
-          {prettyDate(iso)}
-          {week != null && week > 0 && (
-            <span className="ml-2 text-amber">· week {week} of {plan.meta?.planWeeks ?? 26}</span>
-          )}
-        </div>
-        <h1 className="text-2xl text-fg mt-1">
-          <span className="text-amber">$</span> today
-        </h1>
+    <div className="max-w-lg mx-auto px-5 py-5 space-y-4">
+      {/* Date header */}
+      <div>
+        <div className="fit-label">{prettyDate(iso)}</div>
+        {week != null && week > 0 && (
+          <div className="mt-1 text-sm text-fg-dim">
+            Week <span className="text-amber font-semibold">{week}</span> of{" "}
+            {plan.meta?.planWeeks ?? 26}
+          </div>
+        )}
       </div>
 
       {/* Weight card */}
-      <div className="card mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-[11px] text-fg-muted uppercase tracking-wider">weigh in</div>
-          {todayWeightLog && (
-            <div className="text-[11px] text-term-green">
-              ✓ {todayWeightLog.kg} kg logged
+      <div className="fit-card p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="fit-label">Weigh in</div>
+            <div className="fit-stat-num mt-1">
+              {todayWeight ? `${todayWeight.kg} kg` : "—"}
             </div>
+          </div>
+          {todayWeight && (
+            <span className="text-xs text-term-green flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m5 12 5 5L20 7" />
+              </svg>
+              logged
+            </span>
           )}
         </div>
         <form onSubmit={saveWeight} className="flex gap-2">
@@ -62,101 +76,145 @@ export default function TodayTab({ plan, setActiveTab }) {
             type="number"
             inputMode="decimal"
             step="0.1"
-            placeholder={todayWeightLog?.kg || plan.meta?.startWeightKg || "kg"}
+            placeholder={
+              todayWeight?.kg
+                ? `Update (${todayWeight.kg})`
+                : plan.meta?.startWeightKg
+                  ? `${plan.meta.startWeightKg} kg`
+                  : "kg"
+            }
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="flex-1 bg-bg-elev border border-line text-fg text-base font-mono p-3 outline-none focus:border-amber"
+            className="fit-input flex-1"
           />
           <button
             type="submit"
             disabled={!weight}
-            className="btn-primary disabled:opacity-40"
+            className="fit-btn-primary disabled:opacity-40"
           >
-            {weightSaved ? "saved ✓" : "log"}
+            {weightSaved ? "Saved" : "Log"}
           </button>
         </form>
       </div>
 
-      {/* Workout card */}
-      <div className="card mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] text-fg-muted uppercase tracking-wider">today&apos;s workout</div>
-          <button
-            onClick={() => setActiveTab("workout")}
-            className="text-xs text-amber"
-          >
-            open →
-          </button>
-        </div>
-        <h2 className="text-lg text-fg mb-1 capitalize">{today}</h2>
-        <div className="text-sm text-fg-dim">{day?.title}</div>
-        {!day?.rest && day?.exercises?.length > 0 && (
-          <div className="mt-3 text-[11px] text-fg-muted">
-            {day.exercises.length} exercises
+      {/* Today's workout card */}
+      <button
+        onClick={() => setActiveTab("workout")}
+        className="fit-card p-5 text-left w-full active:scale-[0.99] transition"
+      >
+        <div className="flex items-start justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="fit-label">Today&apos;s workout</div>
+            <div className="mt-1 text-lg font-semibold text-fg capitalize">
+              {today}
+            </div>
+            <div className="text-sm text-fg-dim mt-0.5 truncate">
+              {day?.title}
+            </div>
+            {day?.rest ? (
+              <div className="mt-2 inline-flex items-center gap-1.5 text-xs text-amber font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber" />
+                Rest day
+              </div>
+            ) : (
+              <div className="mt-2 text-xs text-fg-muted">
+                {day?.exercises?.length ?? 0} exercises
+              </div>
+            )}
           </div>
-        )}
-        {day?.rest && (
-          <div className="mt-3 text-sm text-term-green">rest day — recover well</div>
-        )}
-      </div>
+          <ChevronRight />
+        </div>
+      </button>
 
       {/* Meals card */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] text-fg-muted uppercase tracking-wider">
-            meals ({todayMeals.length}/{plan.meals?.length ?? 0} logged)
+      <button
+        onClick={() => setActiveTab("diet")}
+        className="fit-card p-5 text-left w-full active:scale-[0.99] transition"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="fit-label">Meals</div>
+            <div className="mt-1 text-lg font-semibold text-fg">
+              <span className="text-amber">{mealsDone}</span>
+              <span className="text-fg-muted"> / {mealsTotal}</span>
+            </div>
           </div>
-          <button
-            onClick={() => setActiveTab("diet")}
-            className="text-xs text-amber"
-          >
-            open →
-          </button>
+          <ChevronRight />
         </div>
 
-        <div className="space-y-2">
-          {plan.meals?.map((meal) => {
-            const logged = todayMeals.find((m) => m.mealId === meal.id);
+        <div className="space-y-0">
+          {plan.meals?.map((meal, i) => {
+            const logged = todayMeals.some((m) => m.mealId === meal.id);
+            const isLast = i === plan.meals.length - 1;
             return (
               <div
                 key={meal.id}
-                className="flex items-center justify-between gap-3 py-1.5"
+                className={`flex items-center gap-3 py-2.5 ${!isLast ? "border-b border-line-soft" : ""}`}
               >
-                <div className="min-w-0">
-                  <div className="text-sm text-fg truncate">{meal.title}</div>
-                  <div className="text-[10px] text-fg-muted">{meal.window}</div>
-                </div>
-                <div className="text-xs shrink-0">
-                  {logged ? (
-                    <span className="text-term-green">✓</span>
-                  ) : (
-                    <span className="text-fg-faint">·</span>
+                <div
+                  className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ${
+                    logged
+                      ? "bg-amber text-white"
+                      : "border border-line"
+                  }`}
+                >
+                  {logged && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m5 12 5 5L20 7" />
+                    </svg>
                   )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm text-fg truncate">{meal.title.split(" — ")[0]}</div>
+                  <div className="text-[11px] text-fg-muted">{meal.window}</div>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </button>
 
-      {/* Macros footer */}
+      {/* Macros summary */}
       {plan.meta?.macros && (
-        <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-          <Macro label="kcal" value={plan.meta.macros.caloriesKcal} />
-          <Macro label="prot" value={`${plan.meta.macros.proteinG}g`} />
-          <Macro label="carb" value={`${plan.meta.macros.carbsG}g`} />
-          <Macro label="fat" value={`${plan.meta.macros.fatsG}g`} />
+        <div className="fit-card p-5">
+          <div className="fit-label mb-3">Daily targets</div>
+          <div className="grid grid-cols-4 gap-3">
+            <Macro label="kcal" value={plan.meta.macros.caloriesKcal} />
+            <Macro label="protein" value={`${plan.meta.macros.proteinG}g`} />
+            <Macro label="carbs" value={`${plan.meta.macros.carbsG}g`} />
+            <Macro label="fat" value={`${plan.meta.macros.fatsG}g`} />
+          </div>
         </div>
       )}
     </div>
   );
 }
 
+function ChevronRight() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-fg-muted shrink-0 mt-1"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
 function Macro({ label, value }) {
   return (
-    <div className="border border-line bg-bg-panel p-2">
-      <div className="text-sm text-fg tabular-nums">{value}</div>
-      <div className="text-[9px] text-fg-muted uppercase mt-0.5">{label}</div>
+    <div className="text-center">
+      <div className="text-base font-semibold tabular-nums text-fg">{value}</div>
+      <div className="text-[10px] text-fg-muted uppercase tracking-wider mt-0.5">
+        {label}
+      </div>
     </div>
   );
 }

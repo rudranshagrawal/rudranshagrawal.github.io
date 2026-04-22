@@ -1,20 +1,20 @@
 import { tap } from "../../lib/haptics";
 
 const TABS = [
-  { id: "today", label: "today", icon: TodayIcon },
-  { id: "workout", label: "workout", icon: WorkoutIcon },
-  { id: "diet", label: "diet", icon: DietIcon },
-  { id: "coach", label: "coach", icon: CoachIcon },
-  { id: "log", label: "log", icon: LogIcon },
+  { id: "today", label: "Today", icon: TodayIcon },
+  { id: "workout", label: "Workout", icon: WorkoutIcon },
+  { id: "diet", label: "Diet", icon: DietIcon },
+  { id: "coach", label: "Coach", icon: CoachIcon },
+  { id: "log", label: "Log", icon: LogIcon },
 ];
 
 export default function BottomNav({ active, onChange }) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-bg/95 backdrop-blur-md border-t border-line"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-bg/90 backdrop-blur-md border-t border-line-soft"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-stretch justify-around">
+      <div className="flex items-stretch justify-around max-w-lg mx-auto">
         {TABS.map((t) => {
           const isActive = active === t.id;
           const Icon = t.icon;
@@ -27,14 +27,16 @@ export default function BottomNav({ active, onChange }) {
                   onChange(t.id);
                 }
               }}
-              className={`flex-1 min-h-[64px] flex flex-col items-center justify-center gap-0.5 active:scale-95 transition ${
+              className={`flex-1 min-h-[60px] flex flex-col items-center justify-center gap-1 transition active:scale-95 ${
                 isActive ? "text-amber" : "text-fg-muted"
               }`}
               aria-label={t.label}
               aria-current={isActive ? "page" : undefined}
             >
-              <Icon size={22} />
-              <span className="text-[10px] tracking-wide">{t.label}</span>
+              <Icon filled={isActive} />
+              <span className={`text-[11px] ${isActive ? "font-semibold" : "font-medium"}`}>
+                {t.label}
+              </span>
             </button>
           );
         })}
@@ -43,51 +45,52 @@ export default function BottomNav({ active, onChange }) {
   );
 }
 
-function TodayIcon({ size = 22 }) {
+function TodayIcon({ filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18" />
-      <path d="M8 3v4M16 3v4" />
-      <circle cx="12" cy="15" r="1.5" fill="currentColor" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={filled ? 2 : 1.6} strokeLinecap="round">
+      <rect x="4" y="6" width="16" height="14" rx="2" />
+      <path d="M4 10h16" />
+      <path d="M8 4v4M16 4v4" />
     </svg>
   );
 }
 
-function WorkoutIcon({ size = 22 }) {
+function WorkoutIcon({ filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M6 6v12M18 6v12" />
-      <path d="M3 9v6M21 9v6" />
-      <path d="M6 12h12" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={filled ? 2 : 1.6} strokeLinecap="round">
+      <path d="M6.5 6.5v11M17.5 6.5v11" />
+      <path d="M3 10v4M21 10v4" />
+      <path d="M6.5 12h11" />
     </svg>
   );
 }
 
-function DietIcon({ size = 22 }) {
+function DietIcon({ filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M4 11a8 8 0 0 1 16 0v0a8 8 0 0 1-16 0z" />
-      <path d="M4 11h16" />
-      <path d="M12 11V3" />
-      <path d="M9 3h6" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={filled ? 2 : 1.6} strokeLinecap="round">
+      <path d="M12 3c-1 3-3 4-3 7a3 3 0 0 0 6 0c0-3-2-4-3-7z" />
+      <path d="M5 20c0-4 3-6 7-6s7 2 7 6" />
     </svg>
   );
 }
 
-function CoachIcon({ size = 22 }) {
+function CoachIcon({ filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={filled ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 12a8 8 0 1 1-3.5-6.6L20 4v4h-4" />
+      <circle cx="9" cy="12" r="0.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="0.5" fill="currentColor" />
+      <circle cx="15" cy="12" r="0.5" fill="currentColor" />
     </svg>
   );
 }
 
-function LogIcon({ size = 22 }) {
+function LogIcon({ filled }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M3 3v18h18" />
-      <path d="M7 14l4-4 4 4 5-7" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={filled ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 20V4" />
+      <path d="M3 20h18" />
+      <path d="M6 16l4-5 4 3 5-8" />
     </svg>
   );
 }

@@ -5,85 +5,97 @@ import { success, bump } from "../../lib/haptics";
 export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
   const [open, setOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-  const logged = todayLogs.find((m) => m.mealId === meal.id);
+  const entriesForThisMeal = todayLogs.filter((m) => m.mealId === meal.id);
+  const logged = entriesForThisMeal.length > 0;
 
   return (
-    <div className="border border-line bg-bg-panel">
+    <div className="fit-card overflow-hidden">
       <button
         onClick={() => {
           bump();
           setOpen((v) => !v);
         }}
-        className="w-full min-h-[64px] flex items-center justify-between gap-3 px-4 py-3 text-left active:bg-bg-elev transition"
+        className="w-full min-h-[60px] flex items-center justify-between gap-3 px-5 py-3.5 text-left active:bg-bg-elev transition"
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <div className="text-fg text-base truncate">{meal.title}</div>
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div
+            className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${
+              logged ? "bg-amber text-white" : "border-2 border-line"
+            }`}
+          >
             {logged && (
-              <span className="text-[10px] text-term-green shrink-0">✓</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m5 12 5 5L20 7" />
+              </svg>
             )}
           </div>
-          <div className="text-[11px] text-fg-muted mt-0.5">{meal.window}</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-base font-medium text-fg truncate">
+              {meal.title.split(" — ")[0]}
+            </div>
+            <div className="text-xs text-fg-muted mt-0.5">{meal.window}</div>
+          </div>
         </div>
-        <span className="text-fg-muted text-xs">{open ? "[ − ]" : "[ + ]"}</span>
+        <Chevron open={open} />
       </button>
 
       {open && (
-        <div className="px-4 pb-4 border-t border-line">
-          {/* Ingredients */}
-          <div className="mt-3">
-            <div className="text-[11px] text-fg-muted uppercase tracking-wider mb-2">
-              ingredients
-            </div>
+        <div className="border-t border-line-soft px-5 pb-5 pt-4 space-y-4">
+          <div>
+            <div className="fit-label mb-2">Ingredients</div>
             <ul className="space-y-1">
               {meal.ingredients?.map((ing, i) => (
                 <li key={i} className="text-sm text-fg-dim relative pl-4">
-                  <span className="absolute left-0 top-2 h-1 w-1 bg-amber" />
+                  <span className="absolute left-0 top-2 h-1 w-1 rounded-full bg-amber" />
                   {ing}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Instructions */}
           {meal.instructions && (
-            <div className="mt-4">
-              <div className="text-[11px] text-fg-muted uppercase tracking-wider mb-2">
-                how to
-              </div>
+            <div>
+              <div className="fit-label mb-2">How to</div>
               <p className="text-sm text-fg-dim leading-relaxed">
                 {meal.instructions}
               </p>
             </div>
           )}
 
-          {/* Action row */}
-          <div className="mt-5 flex gap-2">
+          <div className="flex gap-2 pt-1">
             <button
               onClick={() => setLogOpen(true)}
-              className="btn-primary flex-1 justify-center"
+              className="fit-btn-primary flex-1"
             >
-              {logged ? "log again" : "mark as eaten"}
+              {logged ? "Log again" : "Mark as eaten"}
             </button>
             {onAskAI && (
               <button
                 onClick={() => onAskAI(meal)}
-                className="btn px-4"
+                className="fit-btn"
                 aria-label="ask ai about this meal"
               >
-                ask ai
+                Ask AI
               </button>
             )}
           </div>
 
-          {/* Already logged today */}
-          {todayLogs.filter((m) => m.mealId === meal.id).map((entry, i) => (
-            <div key={i} className="mt-3 text-[11px] text-fg-muted border-t border-line pt-2">
-              <span className="text-term-green">✓ logged</span> at {entry.timeEaten}
-              {entry.minutesToCook > 0 && ` · took ${entry.minutesToCook} min`}
-              {entry.notes && <div className="text-fg-dim mt-1">{entry.notes}</div>}
+          {entriesForThisMeal.length > 0 && (
+            <div className="pt-3 border-t border-line-soft space-y-1.5">
+              {entriesForThisMeal.map((entry, i) => (
+                <div key={i} className="text-xs text-fg-muted">
+                  <span className="text-term-green font-medium">✓</span>{" "}
+                  Eaten at {entry.timeEaten}
+                  {entry.minutesToCook > 0 && ` · took ${entry.minutesToCook} min`}
+                  {entry.notes && (
+                    <div className="text-fg-dim mt-0.5 italic pl-4">
+                      {entry.notes}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -114,12 +126,15 @@ function LogMealModal({ meal, date, onClose, onDone }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-bg/70 backdrop-blur-sm flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center"
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-bg border-t border-amber sm:border sm:mx-4 max-h-[85vh] overflow-y-auto"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl sm:mx-4 max-h-[85vh] overflow-y-auto"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          boxShadow: "0 -8px 24px rgba(31, 31, 31, 0.08)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center pt-2 pb-1 sm:hidden">
@@ -127,59 +142,50 @@ function LogMealModal({ meal, date, onClose, onDone }) {
         </div>
 
         <div className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base text-fg">
-              <span className="text-amber">$</span> log {meal.title.toLowerCase()}
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-semibold text-fg">
+              Log {meal.title.split(" — ")[0].toLowerCase()}
             </h3>
             <button
               onClick={onClose}
-              className="h-10 w-10 flex items-center justify-center text-fg-muted active:scale-95"
+              className="h-10 w-10 flex items-center justify-center text-fg-muted active:scale-95 rounded-full"
               aria-label="close"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M18 6 6 18M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <div className="mb-4">
-            <label className="text-[11px] text-fg-muted block mb-1.5">
-              <span className="text-amber">&gt;</span> eaten at
-            </label>
+          <Field label="Eaten at">
             <input
               type="time"
               value={timeEaten}
               onChange={(e) => setTimeEaten(e.target.value)}
-              className="w-full bg-bg-elev border border-line text-fg text-base font-mono p-3 outline-none focus:border-amber"
+              className="fit-input"
             />
-          </div>
+          </Field>
 
-          <div className="mb-4">
-            <label className="text-[11px] text-fg-muted block mb-1.5">
-              <span className="text-amber">&gt;</span> minutes to cook
-            </label>
+          <Field label="Minutes to cook">
             <input
               type="number"
               inputMode="numeric"
               placeholder="e.g. 25"
               value={minutesToCook}
               onChange={(e) => setMinutesToCook(e.target.value)}
-              className="w-full bg-bg-elev border border-line text-fg text-base font-mono p-3 outline-none focus:border-amber"
+              className="fit-input"
             />
-          </div>
+          </Field>
 
-          <div className="mb-5">
-            <label className="text-[11px] text-fg-muted block mb-1.5">
-              <span className="text-amber">&gt;</span> notes (optional)
-            </label>
+          <Field label="Notes (optional)">
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="swapped curd for yogurt, added spinach, tasty..."
-              className="w-full bg-bg-elev border border-line text-fg text-sm font-mono p-3 outline-none focus:border-amber resize-none"
+              placeholder="Swapped curd for yogurt, added spinach…"
+              className="fit-input resize-none text-sm"
             />
-          </div>
+          </Field>
 
           <button
             onClick={() =>
@@ -192,12 +198,39 @@ function LogMealModal({ meal, date, onClose, onDone }) {
                 loggedAt: new Date().toISOString(),
               })
             }
-            className="w-full btn-primary justify-center"
+            className="fit-btn-primary w-full mt-2"
           >
-            save
+            Save
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div className="mb-4">
+      <label className="fit-label block mb-2">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Chevron({ open }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`text-fg-muted shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }

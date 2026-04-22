@@ -9,10 +9,10 @@ import {
 import { prettyDate } from "../../lib/fitness-format";
 
 const VIEWS = [
-  { id: "weight", label: "weight" },
-  { id: "sessions", label: "sessions" },
-  { id: "meals", label: "meals" },
-  { id: "checkins", label: "check-ins" },
+  { id: "weight", label: "Weight" },
+  { id: "sessions", label: "Sessions" },
+  { id: "meals", label: "Meals" },
+  { id: "checkins", label: "Check-ins" },
 ];
 
 export default function LogTab({ plan }) {
@@ -24,21 +24,16 @@ export default function LogTab({ plan }) {
   const checkins = useMemo(() => getCheckinHistory(), []);
 
   return (
-    <div className="px-4 py-4">
-      <div className="mb-4">
-        <div className="text-[11px] text-fg-muted uppercase tracking-wider">history</div>
-        <h1 className="text-xl text-fg mt-1">
-          <span className="text-amber">$</span> log
-        </h1>
-      </div>
-
-      {/* View chips */}
-      <div className="flex gap-2 mb-4 overflow-x-auto">
+    <div className="max-w-lg mx-auto px-5 py-5 space-y-4">
+      {/* Segmented control */}
+      <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
         {VIEWS.map((v) => (
           <button
             key={v.id}
             onClick={() => setView(v.id)}
-            className={`chip whitespace-nowrap ${view === v.id ? "chip-active" : ""}`}
+            className={`fit-chip whitespace-nowrap ${
+              view === v.id ? "fit-chip-active" : ""
+            }`}
           >
             {v.label}
           </button>
@@ -46,32 +41,36 @@ export default function LogTab({ plan }) {
       </div>
 
       {view === "weight" && (
-        <div className="card">
-          <WeightChart data={weights} />
+        <div className="fit-card p-5">
+          <div className="fit-label mb-3">Weight trend</div>
+          <WeightChart data={weights} goalKg={null} />
         </div>
       )}
 
       {view === "sessions" && (
         <div className="space-y-3">
           {sessions.length === 0 && (
-            <EmptyState text="no sessions logged yet. log your first workout on the workout tab." />
+            <Empty text="No sessions logged yet. Log your first workout from the Workout tab." />
           )}
           {sessions.map(({ date, log }) => (
-            <div key={date} className="card">
-              <div className="flex items-baseline justify-between">
-                <div className="text-sm text-fg">{prettyDate(date)}</div>
-                <div className="text-[10px] text-fg-muted">
+            <div key={date} className="fit-card p-5">
+              <div className="flex items-baseline justify-between mb-2">
+                <div className="text-sm font-semibold text-fg">
+                  {prettyDate(date)}
+                </div>
+                <div className="text-[11px] text-fg-muted">
                   {log?.exercises?.length ?? 0} exercises
                 </div>
               </div>
               {log?.exercises?.length > 0 && (
-                <div className="mt-2 space-y-1">
+                <div className="space-y-1.5">
                   {log.exercises.map((ex, i) => (
-                    <div key={i} className="text-xs text-fg-dim">
-                      <span className="text-amber">$</span> {ex.name}
+                    <div key={i} className="text-sm text-fg-dim">
+                      <span className="font-medium text-fg">{ex.name}</span>
                       {ex.sets?.length > 0 && (
                         <span className="text-fg-muted">
-                          {" "}· {ex.sets.map((s) => `${s.weight}×${s.reps}`).join(", ")}
+                          {" · "}
+                          {ex.sets.map((s) => `${s.weight}×${s.reps}`).join(", ")}
                         </span>
                       )}
                     </div>
@@ -79,7 +78,7 @@ export default function LogTab({ plan }) {
                 </div>
               )}
               {log?.sessionNotes && (
-                <div className="mt-2 text-[11px] text-fg-muted italic border-t border-line pt-2">
+                <div className="mt-3 pt-3 border-t border-line-soft text-xs text-fg-muted italic">
                   {log.sessionNotes}
                 </div>
               )}
@@ -90,21 +89,26 @@ export default function LogTab({ plan }) {
 
       {view === "meals" && (
         <div className="space-y-3">
-          {meals.length === 0 && (
-            <EmptyState text="no meals logged yet." />
-          )}
+          {meals.length === 0 && <Empty text="No meals logged yet." />}
           {meals.map(({ date, entries }) => (
-            <div key={date} className="card">
-              <div className="text-sm text-fg mb-2">{prettyDate(date)}</div>
-              <div className="space-y-1.5">
+            <div key={date} className="fit-card p-5">
+              <div className="text-sm font-semibold text-fg mb-2">
+                {prettyDate(date)}
+              </div>
+              <div className="space-y-2">
                 {entries.map((m, i) => (
-                  <div key={i} className="text-xs text-fg-dim">
-                    <span className="text-amber">·</span> {m.mealTitle} @ {m.timeEaten}
+                  <div key={i} className="text-sm">
+                    <span className="text-fg">{m.mealTitle}</span>
+                    <span className="text-fg-muted"> · {m.timeEaten}</span>
                     {m.minutesToCook > 0 && (
-                      <span className="text-fg-muted"> · {m.minutesToCook} min</span>
+                      <span className="text-fg-muted">
+                        {" "}· {m.minutesToCook}m
+                      </span>
                     )}
                     {m.notes && (
-                      <div className="text-[11px] text-fg-muted pl-3 italic">{m.notes}</div>
+                      <div className="text-xs text-fg-muted italic pl-1 mt-0.5">
+                        {m.notes}
+                      </div>
                     )}
                   </div>
                 ))}
@@ -117,24 +121,34 @@ export default function LogTab({ plan }) {
       {view === "checkins" && (
         <div className="space-y-3">
           {checkins.length === 0 && (
-            <EmptyState text="no weekly check-ins yet. submit one from the coach tab on saturdays." />
+            <Empty text="No check-ins yet. Fill one out on the Coach tab on Saturdays." />
           )}
           {checkins.map((c, i) => (
-            <div key={i} className="card">
-              <div className="flex items-baseline justify-between">
-                <div className="text-sm text-fg">week {c.weekNumber ?? "?"}</div>
-                <div className="text-[10px] text-fg-muted">
-                  {c.submittedAt ? prettyDate(c.submittedAt.slice(0, 10)) : ""}
+            <div key={i} className="fit-card p-5">
+              <div className="flex items-baseline justify-between mb-2">
+                <div className="text-sm font-semibold text-fg">
+                  Week {c.weekNumber ?? "?"}
                 </div>
+                {c.submittedAt && (
+                  <div className="text-[11px] text-fg-muted">
+                    {prettyDate(c.submittedAt.slice(0, 10))}
+                  </div>
+                )}
               </div>
               {c.currentWeight && (
-                <div className="text-xs text-fg-dim mt-1">weight: {c.currentWeight} kg</div>
+                <div className="text-sm text-fg-dim">
+                  Weight: {c.currentWeight} kg
+                </div>
               )}
               {c.dietConsistency && (
-                <div className="text-xs text-fg-dim mt-1">diet: {c.dietConsistency}</div>
+                <div className="text-sm text-fg-dim mt-1">
+                  Diet: {c.dietConsistency}
+                </div>
               )}
               {c.mentalState && (
-                <div className="text-xs text-fg-dim mt-1">mental: {c.mentalState}</div>
+                <div className="text-sm text-fg-dim mt-1">
+                  Mental: {c.mentalState}
+                </div>
               )}
             </div>
           ))}
@@ -144,10 +158,10 @@ export default function LogTab({ plan }) {
   );
 }
 
-function EmptyState({ text }) {
+function Empty({ text }) {
   return (
-    <div className="text-center py-10 text-fg-muted text-sm border border-dashed border-line">
-      {text}
+    <div className="fit-card p-8 text-center">
+      <div className="text-sm text-fg-muted">{text}</div>
     </div>
   );
 }

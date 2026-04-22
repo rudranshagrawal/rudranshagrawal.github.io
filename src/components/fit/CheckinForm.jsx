@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { addCheckin, getPrefs } from "../../lib/storage";
 import { openWhatsApp } from "../../lib/whatsapp";
-import { todayISO, weekNumber, buildCheckinMessage, recentSummary } from "../../lib/fitness-format";
+import {
+  todayISO,
+  weekNumber,
+  buildCheckinMessage,
+  recentSummary,
+} from "../../lib/fitness-format";
 import { success } from "../../lib/haptics";
 
 const EMPTY = {
@@ -41,7 +46,7 @@ export default function CheckinForm({ plan, draft, onDrafted }) {
     const msg = preview || build();
     const { coachWhatsApp } = getPrefs();
     if (!coachWhatsApp) {
-      setStatus("set your coach's whatsapp number in settings first");
+      setStatus("Set your coach's WhatsApp number in Settings first");
       setTimeout(() => setStatus(""), 3500);
       return;
     }
@@ -50,145 +55,146 @@ export default function CheckinForm({ plan, draft, onDrafted }) {
       ...form,
       weekNumber: wk,
       submittedAt: new Date().toISOString(),
-      currentWeight: form.currentWeight ? parseFloat(form.currentWeight) : null,
+      currentWeight: form.currentWeight
+        ? parseFloat(form.currentWeight)
+        : null,
     });
     success();
-    setStatus("check-in saved + whatsapp opened");
+    setStatus("Check-in saved and WhatsApp opened");
     setTimeout(() => setStatus(""), 3500);
   };
 
   return (
-    <div className="card">
-      <div className="flex items-baseline justify-between mb-4">
-        <h3 className="text-base text-fg">
-          <span className="text-amber">$</span> weekly check-in
-        </h3>
+    <div className="fit-card p-5">
+      <div className="flex items-baseline justify-between mb-5">
+        <div>
+          <h3 className="text-lg font-semibold text-fg">Weekly check-in</h3>
+          <p className="text-xs text-fg-muted mt-0.5">
+            Saturdays, then WhatsApp to coach
+          </p>
+        </div>
         {wk != null && wk > 0 && (
-          <span className="text-[11px] text-amber">week {wk}</span>
+          <span className="text-xs font-semibold text-amber">Week {wk}</span>
         )}
       </div>
 
-      <Field label="current weight (kg)">
+      <Field label="Current weight (kg)">
         <input
           type="number"
           inputMode="decimal"
           step="0.1"
           value={form.currentWeight}
           onChange={(e) => set("currentWeight", e.target.value)}
-          className={inputCls()}
+          className="fit-input"
         />
       </Field>
 
-      <Field label="diet consistency">
+      <Field label="Diet consistency">
         <textarea
           value={form.dietConsistency}
           onChange={(e) => set("dietConsistency", e.target.value)}
           rows={2}
-          className={inputCls()}
-          placeholder="followed ~90%, skipped dinner twice"
+          className="fit-input resize-none text-sm"
+          placeholder="Followed ~90%, skipped dinner twice"
         />
       </Field>
 
-      <Field label="workouts regular?">
+      <Field label="Workouts regular?">
         <textarea
           value={form.workoutsRegular}
           onChange={(e) => set("workoutsRegular", e.target.value)}
           rows={2}
-          className={inputCls()}
+          className="fit-input resize-none text-sm"
           placeholder="6/6 sessions, hit all PRs except overhead"
         />
       </Field>
 
-      <Field label="energy levels">
+      <Field label="Energy levels">
         <textarea
           value={form.energyLevels}
           onChange={(e) => set("energyLevels", e.target.value)}
           rows={2}
-          className={inputCls()}
+          className="fit-input resize-none text-sm"
         />
       </Field>
 
-      <Field label="physical changes noticed">
+      <Field label="Physical changes noticed">
         <textarea
           value={form.physicalChanges}
           onChange={(e) => set("physicalChanges", e.target.value)}
           rows={2}
-          className={inputCls()}
+          className="fit-input resize-none text-sm"
         />
       </Field>
 
-      <Field label="mental state">
+      <Field label="Mental state">
         <textarea
           value={form.mentalState}
           onChange={(e) => set("mentalState", e.target.value)}
           rows={2}
-          className={inputCls()}
+          className="fit-input resize-none text-sm"
         />
       </Field>
 
-      <Field label="extra notes for coach">
+      <Field label="Extra notes for coach">
         <textarea
           value={form.extraNotes}
           onChange={(e) => set("extraNotes", e.target.value)}
           rows={2}
-          className={inputCls()}
-          placeholder="questions, anything else..."
+          className="fit-input resize-none text-sm"
+          placeholder="Questions, anything else…"
         />
       </Field>
 
-      <label className="flex items-center gap-2 mt-3 mb-4 select-none">
+      <label className="flex items-center gap-2.5 mt-4 mb-4 select-none cursor-pointer">
         <input
           type="checkbox"
           checked={form.attachPics}
           onChange={(e) => set("attachPics", e.target.checked)}
-          className="h-5 w-5 accent-amber"
+          className="h-5 w-5 rounded accent-amber"
         />
-        <span className="text-sm text-fg-dim">photos attached separately</span>
+        <span className="text-sm text-fg-dim">
+          Photos attached separately in WhatsApp
+        </span>
       </label>
 
-      {/* Preview */}
       {preview && (
-        <div className="mt-4 border border-line bg-bg-elev p-3">
-          <div className="text-[10px] text-fg-muted uppercase tracking-wider mb-2">
-            preview
-          </div>
-          <pre className="text-xs text-fg-dim whitespace-pre-wrap font-mono">{preview}</pre>
+        <div className="mt-4 bg-bg-elev rounded-xl p-4">
+          <div className="fit-label mb-2">Preview</div>
+          <pre className="text-xs text-fg-dim whitespace-pre-wrap leading-relaxed font-sans">
+            {preview}
+          </pre>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <button onClick={build} className="btn justify-center">
-          generate draft
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        <button onClick={build} className="fit-btn">
+          Generate draft
         </button>
-        <button onClick={sendToCoach} className="btn-primary justify-center">
-          send on whatsapp
+        <button onClick={sendToCoach} className="fit-btn-primary">
+          Send on WhatsApp
         </button>
       </div>
 
       {status && (
-        <div className="mt-3 text-[11px] text-term-green">{status}</div>
+        <div className="mt-3 text-sm text-term-green font-medium">
+          {status}
+        </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-line text-[10px] text-fg-faint leading-relaxed">
-        rule: send saturdays 9am–11:59pm IST. attach front + side photos in
-        whatsapp after the message opens.
-      </div>
+      <p className="mt-5 pt-4 border-t border-line-soft text-xs text-fg-faint leading-relaxed">
+        Rule: send Saturdays 9am–11:59pm IST. Attach front and side photos in
+        WhatsApp after the message opens.
+      </p>
     </div>
   );
 }
 
 function Field({ label, children }) {
   return (
-    <div className="mb-3">
-      <label className="text-[11px] text-fg-muted block mb-1.5">
-        <span className="text-amber">&gt;</span> {label}
-      </label>
+    <div className="mb-4">
+      <label className="fit-label block mb-2">{label}</label>
       {children}
     </div>
   );
-}
-
-function inputCls() {
-  return "w-full bg-bg-elev border border-line text-fg text-sm font-mono p-2.5 outline-none focus:border-amber transition resize-none";
 }
