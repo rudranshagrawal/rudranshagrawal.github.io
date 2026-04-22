@@ -252,6 +252,16 @@
   --selection-bg: #E8F1ED;
   --selection-fg: #1F1F1F;
 
+  /* State colors (done / skipped / missed / rest) */
+  --fit-done: 74 127 106;          /* sage */
+  --fit-done-soft: 232 241 237;
+  --fit-skipped: 201 154 62;       /* warm amber mustard */
+  --fit-skipped-soft: 247 238 217;
+  --fit-missed: 184  99  62;       /* terracotta */
+  --fit-missed-soft: 247 229 218;
+  --fit-rest: 139 154 160;         /* muted slate */
+  --fit-rest-soft: 232 235 237;
+
   /* No mono default inside fit-theme */
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
   color: rgb(var(--color-fg));
@@ -333,6 +343,28 @@
 
   .fit-divider {
     @apply border-t border-line-soft my-2;
+  }
+
+  /* Status pills */
+  .fit-status-done {
+    background-color: rgb(var(--fit-done));
+    color: white;
+  }
+  .fit-status-done-soft {
+    background-color: rgb(var(--fit-done-soft));
+    color: rgb(var(--fit-done));
+  }
+  .fit-status-skipped {
+    background-color: rgb(var(--fit-skipped-soft));
+    color: rgb(var(--fit-skipped));
+  }
+  .fit-status-missed {
+    background-color: rgb(var(--fit-missed-soft));
+    color: rgb(var(--fit-missed));
+  }
+  .fit-status-rest {
+    background-color: rgb(var(--fit-rest-soft));
+    color: rgb(var(--fit-rest));
   }
 }
 

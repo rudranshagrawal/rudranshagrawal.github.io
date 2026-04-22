@@ -79,13 +79,150 @@ export function saveSessionLog(date, log) {
   set(sessionKey(date), log);
 }
 
+/**
+ * Quick-mark an exercise as either "done" or "skipped".
+ * - done: if no sets yet, seed with suggested sets (1 set with current values).
+ * - skipped: sets an explicit status; preserves any existing logs.
+ */
+export function quickMarkExercise(date, exerciseName, status, seedSet = null) {
+  const log = getSessionLog(date) || { exercises: [], sessionNotes: "" };
+  const idx = log.exercises.findIndex((e) => e.name === exerciseName);
+  if (idx >= 0) {
+    const ex = { ...log.exercises[idx], status };
+    if (status === "done" && (!ex.sets || ex.sets.length === 0) && seedSet) {
+      ex.sets = [seedSet];
+    }
+    log.exercises[idx] = ex;
+  } else {
+    log.exercises.push({
+      name: exerciseName,
+      sets: status === "done" && seedSet ? [seedSet] : [],
+      notes: "",
+      status,
+    });
+  }
+  saveSessionLog(date, log);
+  return log;
+}
+
+/**
+ * Clear status for an exercise (back to pending). Doesn't remove logged sets.
+ */
+export function clearExerciseStatus(date, exerciseName) {
+  const log = getSessionLog(date);
+  if (!log) return;
+  const idx = log.exercises.findIndex((e) => e.name === exerciseName);
+  if (idx < 0) return;
+  const ex = { ...log.exercises[idx] };
+  delete ex.status;
+  log.exercises[idx] = ex;
+  saveSessionLog(date, log);
+}
+
+/**
+ * Compute exercise status from existing data:
+ *   - explicit 'skipped' → 'skipped'
+ *   - explicit 'done' OR sets.length > 0 → 'done'
+ *   - else null (pending)
+ */
+export function exerciseStatus(log, exerciseName) {
+  const ex = log?.exercises?.find((e) => e.name === exerciseName);
+  if (!ex) return null;
+  if (ex.status === "skipped") return "skipped";
+  if (ex.status === "done" || (ex.sets && ex.sets.length > 0)) return "done";
+  return null;
+}
+
+/**
+ * Compute a day's status summary from the plan's workout + the session log.
+ *   rest, skipped (whole day skipped), done (all exercises addressed),
+ *   partial (some addressed), pending (nothing logged yet).
+ */
+export function dayStatus({ workouts, dayKey, date }) {
+  const day = workouts?.[dayKey];
+  if (!day) return "pending";
+  if (day.rest) return "rest";
+  const log = getSessionLog(date);
+  const exercises = day.exercises || [];
+  if (!log || !log.exercises || log.exercises.length === 0) return "pending";
+  if (log.status === "skipped") return "skipped";
+  let done = 0;
+  let skipped = 0;
+  for (const ex of exercises) {
+    const st = exerciseStatus(log, ex.name);
+    if (st === "done") done++;
+    else if (st === "skipped") skipped++;
+  }
+  const addressed = done + skipped;
+  if (addressed === 0) return "pending";
+  if (addressed < exercises.length) return "partial";
+  if (done === 0) return "skipped";
+  return "done";
+}
+
+/**
+ * Mark the entire workout day as skipped.
+ */
+export function skipWorkoutDay(date) {
+  const existing = getSessionLog(date) || { exercises: [], sessionNotes: "" };
+  saveSessionLog(date, { ...existing, status: "skipped" });
+}
+
+export function unSkipWorkoutDay(date) {
+  const log = getSessionLog(date);
+  if (!log) return;
+  const { status, ...rest } = log;
+  saveSessionLog(date, rest);
+}
+
 export function getMealLog(date) {
   return get(mealKey(date), []);
 }
 
 export function appendMealLog(date, entry) {
   const existing = getMealLog(date);
+  const status = entry.status || "eaten";
+  set(mealKey(date), [...existing, { ...entry, status }]);
+}
+
+/**
+ * Quick-mark a meal as either "eaten" or "skipped" with minimal data.
+ * Overwrites any previous entry for that meal on that date.
+ */
+export function quickMarkMeal(date, mealId, mealTitle, status) {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const existing = getMealLog(date).filter((e) => e.mealId !== mealId);
+  const entry = {
+    mealId,
+    mealTitle,
+    status,
+    timeEaten: status === "eaten" ? `${hh}:${mm}` : "",
+    minutesToCook: 0,
+    notes: "",
+    loggedAt: new Date().toISOString(),
+  };
   set(mealKey(date), [...existing, entry]);
+  return entry;
+}
+
+/**
+ * Remove a meal entry for the given meal id on a date (sets it back to pending).
+ */
+export function clearMealEntry(date, mealId) {
+  const existing = getMealLog(date).filter((e) => e.mealId !== mealId);
+  set(mealKey(date), existing);
+}
+
+/**
+ * Get the status for a specific meal on a date:
+ *   'eaten' | 'skipped' | null
+ */
+export function getMealStatus(date, mealId) {
+  const entries = getMealLog(date);
+  const latest = entries.filter((e) => e.mealId === mealId).slice(-1)[0];
+  return latest?.status ?? null;
 }
 
 export function getWeightLog() {

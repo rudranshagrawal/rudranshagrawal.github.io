@@ -1,7 +1,13 @@
 import { useState } from "react";
 import YouTubeEmbed from "./YouTubeEmbed";
 import { lastBestSet } from "../../lib/fitness-format";
-import { bump } from "../../lib/haptics";
+import {
+  quickMarkExercise,
+  clearExerciseStatus,
+  exerciseStatus,
+  getSessionLog,
+} from "../../lib/storage";
+import { bump, success, tap } from "../../lib/haptics";
 
 export default function ExerciseRow({
   exercise,
@@ -11,39 +17,103 @@ export default function ExerciseRow({
   notes,
   onNotesChange,
   onOpenFocus,
+  onStatusChange,
 }) {
   const [open, setOpen] = useState(false);
   const last = lastBestSet(exercise.name, todayISO);
 
+  const sessionLog = getSessionLog(todayISO);
+  const status = exerciseStatus(sessionLog, exercise.name);
+
+  const markDone = () => {
+    if (status === "done") {
+      clearExerciseStatus(todayISO, exercise.name);
+      tap();
+    } else {
+      // If no sets yet, seed with last week's best (or placeholder)
+      const seed =
+        !sets || sets.length === 0
+          ? {
+              weight: last?.weight ?? 0,
+              reps: last?.reps ?? 10,
+              rpe: null,
+            }
+          : null;
+      quickMarkExercise(todayISO, exercise.name, "done", seed);
+      success();
+    }
+    onStatusChange?.();
+  };
+
+  const markSkipped = () => {
+    if (status === "skipped") {
+      clearExerciseStatus(todayISO, exercise.name);
+    } else {
+      quickMarkExercise(todayISO, exercise.name, "skipped");
+    }
+    tap();
+    onStatusChange?.();
+  };
+
   return (
     <div className="border border-line rounded-xl bg-white overflow-hidden">
-      <button
-        onClick={() => {
-          bump();
-          setOpen((v) => !v);
-        }}
-        className="w-full min-h-[60px] flex items-center justify-between gap-3 px-4 py-3 text-left active:bg-bg-elev transition"
-      >
-        <div className="min-w-0 flex-1">
-          <div className="text-base font-medium text-fg truncate">
-            {exercise.name}
+      <div className="flex items-stretch">
+        <button
+          onClick={() => {
+            bump();
+            setOpen((v) => !v);
+          }}
+          className="flex-1 min-h-[64px] flex items-center gap-3 px-4 py-3 text-left active:bg-bg-elev transition"
+        >
+          <StatusDot status={status} />
+          <div className="min-w-0 flex-1">
+            <div className="text-base font-medium text-fg truncate">
+              {exercise.name}
+            </div>
+            <div className="text-xs text-fg-muted mt-0.5 flex items-center gap-2 flex-wrap">
+              <span>{exercise.scheme || "3×10–12"}</span>
+              {last && (
+                <span className="text-fg-faint">
+                  · last: {last.weight ?? "?"}kg × {last.reps ?? "?"}
+                </span>
+              )}
+              {sets?.length > 0 && (
+                <span className="text-[rgb(var(--fit-done))] font-medium">
+                  · {sets.length} logged
+                </span>
+              )}
+              {status === "skipped" && (
+                <span className="text-[rgb(var(--fit-skipped))] font-medium">
+                  · skipped
+                </span>
+              )}
+            </div>
           </div>
-          <div className="text-xs text-fg-muted mt-0.5 flex items-center gap-2 flex-wrap">
-            <span>{exercise.scheme || "3×10–12"}</span>
-            {last && (
-              <span className="text-fg-faint">
-                · last: {last.weight ?? "?"}kg × {last.reps ?? "?"}
-              </span>
-            )}
-            {sets?.length > 0 && (
-              <span className="text-amber font-medium">
-                · {sets.length} logged
-              </span>
-            )}
-          </div>
+        </button>
+
+        <div className="flex items-center gap-1.5 pr-3">
+          <QuickAction
+            active={status === "done"}
+            onClick={markDone}
+            variant="done"
+            label="Mark done"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12 5 5L20 7" />
+            </svg>
+          </QuickAction>
+          <QuickAction
+            active={status === "skipped"}
+            onClick={markSkipped}
+            variant="skipped"
+            label="Skip exercise"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </QuickAction>
         </div>
-        <Chevron open={open} />
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-line-soft px-4 pb-4 pt-3 space-y-3">
@@ -81,6 +151,47 @@ export default function ExerciseRow({
         </div>
       )}
     </div>
+  );
+}
+
+function StatusDot({ status }) {
+  if (status === "done") {
+    return (
+      <div className="h-7 w-7 rounded-full bg-[rgb(var(--fit-done))] text-white flex items-center justify-center shrink-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m5 12 5 5L20 7" />
+        </svg>
+      </div>
+    );
+  }
+  if (status === "skipped") {
+    return (
+      <div className="h-7 w-7 rounded-full bg-[rgb(var(--fit-skipped))] text-white flex items-center justify-center shrink-0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </div>
+    );
+  }
+  return (
+    <div className="h-7 w-7 rounded-full border-2 border-line shrink-0" />
+  );
+}
+
+function QuickAction({ active, onClick, variant, label, children }) {
+  const base =
+    "h-11 w-11 rounded-full flex items-center justify-center transition active:scale-90 shrink-0";
+  const inactive = "border border-line text-fg-muted hover:text-fg";
+  const doneActive = "bg-[rgb(var(--fit-done))] text-white";
+  const skippedActive = "bg-[rgb(var(--fit-skipped))] text-white";
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`${base} ${active ? (variant === "done" ? doneActive : skippedActive) : inactive}`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -148,7 +259,9 @@ function NumField({ label, value, step, onChange }) {
   return (
     <div className="flex-1 flex items-stretch border border-line rounded-xl overflow-hidden bg-bg-elev">
       <button
-        onClick={() => onChange(Math.max(0, +(Number(value || 0) - step).toFixed(2)))}
+        onClick={() =>
+          onChange(Math.max(0, +(Number(value || 0) - step).toFixed(2)))
+        }
         className="w-11 text-fg-dim active:bg-line-soft text-lg font-medium"
         aria-label={`decrease ${label}`}
       >
@@ -170,23 +283,5 @@ function NumField({ label, value, step, onChange }) {
         +
       </button>
     </div>
-  );
-}
-
-function Chevron({ open }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`text-fg-muted shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
   );
 }

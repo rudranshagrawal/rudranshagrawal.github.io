@@ -1,46 +1,89 @@
 import { useState } from "react";
-import { appendMealLog } from "../../lib/storage";
-import { success, bump } from "../../lib/haptics";
+import {
+  appendMealLog,
+  getMealStatus,
+  clearMealEntry,
+  quickMarkMeal,
+} from "../../lib/storage";
+import { success, tap } from "../../lib/haptics";
 
 export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
   const [open, setOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-  const entriesForThisMeal = todayLogs.filter((m) => m.mealId === meal.id);
-  const logged = entriesForThisMeal.length > 0;
+
+  const status = getMealStatus(date, meal.id);
+  const latest = todayLogs
+    .filter((m) => m.mealId === meal.id)
+    .slice(-1)[0];
+
+  const quickToggle = (target) => {
+    if (status === target) {
+      clearMealEntry(date, meal.id);
+    } else {
+      quickMarkMeal(date, meal.id, meal.title, target);
+      tap();
+      if (target === "eaten") success();
+    }
+    onLogged?.();
+  };
 
   return (
     <div className="fit-card overflow-hidden">
-      <button
-        onClick={() => {
-          bump();
-          setOpen((v) => !v);
-        }}
-        className="w-full min-h-[60px] flex items-center justify-between gap-3 px-5 py-3.5 text-left active:bg-bg-elev transition"
-      >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div
-            className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${
-              logged ? "bg-amber text-white" : "border-2 border-line"
-            }`}
-          >
-            {logged && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m5 12 5 5L20 7" />
-              </svg>
-            )}
-          </div>
+      <div className="flex items-stretch">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex-1 min-h-[64px] flex items-center gap-3 px-5 py-3.5 text-left active:bg-bg-elev transition"
+        >
+          <StatusDot status={status} />
           <div className="min-w-0 flex-1">
             <div className="text-base font-medium text-fg truncate">
               {meal.title.split(" — ")[0]}
             </div>
-            <div className="text-xs text-fg-muted mt-0.5">{meal.window}</div>
+            <div className="text-xs text-fg-muted mt-0.5">
+              {meal.window}
+              {latest?.timeEaten && status === "eaten" && (
+                <span className="text-[rgb(var(--fit-done))]">
+                  {" "}· ate @ {latest.timeEaten}
+                  {latest.minutesToCook > 0 && ` · ${latest.minutesToCook}m`}
+                </span>
+              )}
+              {status === "skipped" && (
+                <span className="text-[rgb(var(--fit-skipped))]">
+                  {" "}· skipped
+                </span>
+              )}
+            </div>
           </div>
+        </button>
+
+        {/* Quick actions — always visible */}
+        <div className="flex items-center gap-1.5 pr-3">
+          <QuickAction
+            active={status === "eaten"}
+            onClick={() => quickToggle("eaten")}
+            variant="done"
+            label="Mark as eaten"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12 5 5L20 7" />
+            </svg>
+          </QuickAction>
+          <QuickAction
+            active={status === "skipped"}
+            onClick={() => quickToggle("skipped")}
+            variant="skipped"
+            label="Skip meal"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </QuickAction>
         </div>
-        <Chevron open={open} />
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-line-soft px-5 pb-5 pt-4 space-y-4">
+          {/* Ingredients */}
           <div>
             <div className="fit-label mb-2">Ingredients</div>
             <ul className="space-y-1">
@@ -53,6 +96,7 @@ export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
             </ul>
           </div>
 
+          {/* Instructions */}
           {meal.instructions && (
             <div>
               <div className="fit-label mb-2">How to</div>
@@ -62,12 +106,13 @@ export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
             </div>
           )}
 
+          {/* Full log + AI */}
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => setLogOpen(true)}
-              className="fit-btn-primary flex-1"
+              className="fit-btn flex-1"
             >
-              {logged ? "Log again" : "Mark as eaten"}
+              {status === "eaten" ? "Add details" : "Log with details"}
             </button>
             {onAskAI && (
               <button
@@ -80,20 +125,10 @@ export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
             )}
           </div>
 
-          {entriesForThisMeal.length > 0 && (
-            <div className="pt-3 border-t border-line-soft space-y-1.5">
-              {entriesForThisMeal.map((entry, i) => (
-                <div key={i} className="text-xs text-fg-muted">
-                  <span className="text-term-green font-medium">✓</span>{" "}
-                  Eaten at {entry.timeEaten}
-                  {entry.minutesToCook > 0 && ` · took ${entry.minutesToCook} min`}
-                  {entry.notes && (
-                    <div className="text-fg-dim mt-0.5 italic pl-4">
-                      {entry.notes}
-                    </div>
-                  )}
-                </div>
-              ))}
+          {/* History for this meal today */}
+          {latest?.notes && (
+            <div className="pt-3 border-t border-line-soft text-xs text-fg-dim italic">
+              {latest.notes}
             </div>
           )}
         </div>
@@ -103,8 +138,11 @@ export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
         <LogMealModal
           meal={meal}
           date={date}
+          existing={latest}
           onClose={() => setLogOpen(false)}
           onDone={(entry) => {
+            // If there was a prior entry, remove it so we don't stack duplicates
+            clearMealEntry(date, meal.id);
             appendMealLog(date, entry);
             success();
             onLogged?.();
@@ -116,13 +154,58 @@ export default function MealRow({ meal, date, todayLogs, onLogged, onAskAI }) {
   );
 }
 
-function LogMealModal({ meal, date, onClose, onDone }) {
+function StatusDot({ status }) {
+  if (status === "eaten") {
+    return (
+      <div className="h-7 w-7 rounded-full bg-[rgb(var(--fit-done))] text-white flex items-center justify-center shrink-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m5 12 5 5L20 7" />
+        </svg>
+      </div>
+    );
+  }
+  if (status === "skipped") {
+    return (
+      <div className="h-7 w-7 rounded-full bg-[rgb(var(--fit-skipped))] text-white flex items-center justify-center shrink-0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </div>
+    );
+  }
+  return (
+    <div className="h-7 w-7 rounded-full border-2 border-line shrink-0" />
+  );
+}
+
+function QuickAction({ active, onClick, variant, label, children }) {
+  const base =
+    "h-11 w-11 rounded-full flex items-center justify-center transition active:scale-90 shrink-0";
+  const inactive = "border border-line text-fg-muted hover:text-fg";
+  const doneActive = "bg-[rgb(var(--fit-done))] text-white";
+  const skippedActive = "bg-[rgb(var(--fit-skipped))] text-white";
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`${base} ${active ? (variant === "done" ? doneActive : skippedActive) : inactive}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function LogMealModal({ meal, date, existing, onClose, onDone }) {
   const now = new Date();
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
-  const [timeEaten, setTimeEaten] = useState(`${hh}:${mm}`);
-  const [minutesToCook, setMinutesToCook] = useState("");
-  const [notes, setNotes] = useState("");
+  const [timeEaten, setTimeEaten] = useState(
+    existing?.timeEaten || `${hh}:${mm}`
+  );
+  const [minutesToCook, setMinutesToCook] = useState(
+    existing?.minutesToCook ? String(existing.minutesToCook) : ""
+  );
+  const [notes, setNotes] = useState(existing?.notes || "");
 
   return (
     <div
@@ -130,7 +213,7 @@ function LogMealModal({ meal, date, onClose, onDone }) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl sm:mx-4 max-h-[85vh] overflow-y-auto"
+        className="w-full sm:max-w-md bg-bg rounded-t-3xl sm:rounded-3xl sm:mx-4 max-h-[85vh] overflow-y-auto"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
           boxShadow: "0 -8px 24px rgba(31, 31, 31, 0.08)",
@@ -192,6 +275,7 @@ function LogMealModal({ meal, date, onClose, onDone }) {
               onDone({
                 mealId: meal.id,
                 mealTitle: meal.title,
+                status: "eaten",
                 timeEaten,
                 minutesToCook: minutesToCook ? parseInt(minutesToCook, 10) : 0,
                 notes: notes.trim(),
@@ -214,23 +298,5 @@ function Field({ label, children }) {
       <label className="fit-label block mb-2">{label}</label>
       {children}
     </div>
-  );
-}
-
-function Chevron({ open }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`text-fg-muted shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
   );
 }

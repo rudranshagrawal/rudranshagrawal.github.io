@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import ExerciseRow from "./ExerciseRow";
 import ExerciseFocus from "./ExerciseFocus";
-import { dayOfWeek, todayISO } from "../../lib/fitness-format";
-import { getSessionLog, saveSessionLog } from "../../lib/storage";
+import { dayOfWeek, todayISO, prettyDate, dayKeyForISO } from "../../lib/fitness-format";
+import {
+  getSessionLog,
+  saveSessionLog,
+  exerciseStatus,
+  skipWorkoutDay,
+  unSkipWorkoutDay,
+  dayStatus,
+} from "../../lib/storage";
 
 const DAY_ORDER = [
   "monday",
@@ -14,6 +21,14 @@ const DAY_ORDER = [
   "sunday",
 ];
 
+const STATUS_COPY = {
+  done: { label: "Done", className: "fit-status-done-soft" },
+  partial: { label: "In progress", className: "fit-status-done-soft" },
+  skipped: { label: "Skipped", className: "fit-status-skipped" },
+  pending: { label: "", className: "" },
+  rest: { label: "Rest", className: "fit-status-rest" },
+};
+
 export default function WorkoutTab({ plan }) {
   const today = dayOfWeek();
   const iso = todayISO();
@@ -22,13 +37,12 @@ export default function WorkoutTab({ plan }) {
   const [log, setLog] = useState(
     () => getSessionLog(iso) || { exercises: [], sessionNotes: "" }
   );
+  const [tick, setTick] = useState(0);
   const [focusState, setFocusState] = useState(null);
 
   useEffect(() => {
-    const existing =
-      getSessionLog(viewDate) || { exercises: [], sessionNotes: "" };
-    setLog(existing);
-  }, [viewDate]);
+    setLog(getSessionLog(viewDate) || { exercises: [], sessionNotes: "" });
+  }, [viewDate, tick]);
 
   const persist = useCallback(
     (next) => {
@@ -60,13 +74,61 @@ export default function WorkoutTab({ plan }) {
     persist({ ...log, exercises: next });
   };
 
+  const refresh = () => setTick((n) => n + 1);
+
+  const toggleSkipDay = (e) => {
+    e.stopPropagation();
+    const status = dayStatus({
+      workouts: plan.workouts,
+      dayKey: dayKeyForISO(iso),
+      date: iso,
+    });
+    if (status === "skipped") {
+      unSkipWorkoutDay(iso);
+    } else {
+      skipWorkoutDay(iso);
+    }
+    refresh();
+  };
+
   return (
-    <div className="max-w-lg mx-auto px-5 py-5 space-y-3">
+    <div className="max-w-lg mx-auto px-5 pt-4 pb-5 space-y-3">
+      <div>
+        <div className="fit-label">Workout plan</div>
+        <h1 className="text-2xl font-semibold tracking-tight text-fg mt-1">
+          6-day split
+        </h1>
+        <p className="text-sm text-fg-muted mt-1">
+          Tap any day to expand. Use ✓ or ✗ on each exercise for quick logging.
+        </p>
+      </div>
+
       {DAY_ORDER.map((dayKey) => {
         const day = plan.workouts[dayKey];
         if (!day) return null;
         const isToday = dayKey === today;
         const isOpen = expanded === dayKey;
+        const status = isToday
+          ? dayStatus({
+              workouts: plan.workouts,
+              dayKey,
+              date: iso,
+            })
+          : day.rest
+            ? "rest"
+            : "pending";
+        const copy = STATUS_COPY[status] || STATUS_COPY.pending;
+
+        let doneCount = 0;
+        let skippedCount = 0;
+        if (isToday && !day.rest) {
+          for (const ex of day.exercises || []) {
+            const st = exerciseStatus(log, ex.name);
+            if (st === "done") doneCount++;
+            else if (st === "skipped") skippedCount++;
+          }
+        }
+
         return (
           <div
             key={dayKey}
@@ -76,10 +138,10 @@ export default function WorkoutTab({ plan }) {
           >
             <button
               onClick={() => setExpanded(isOpen ? null : dayKey)}
-              className="w-full min-h-[60px] flex items-center justify-between gap-3 px-5 py-4 text-left active:bg-bg-elev transition"
+              className="w-full min-h-[64px] flex items-center justify-between gap-3 px-5 py-4 text-left active:bg-bg-elev transition"
             >
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-base font-semibold text-fg capitalize">
                     {dayKey}
                   </span>
@@ -88,10 +150,33 @@ export default function WorkoutTab({ plan }) {
                       Today
                     </span>
                   )}
+                  {copy.label && (
+                    <span
+                      className={`inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${copy.className}`}
+                    >
+                      {copy.label}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-fg-muted mt-0.5 truncate">
                   {day.title}
                 </div>
+                {isToday && !day.rest && (day.exercises?.length ?? 0) > 0 && (
+                  <div className="mt-2 text-[11px] text-fg-muted">
+                    {doneCount} done
+                    {skippedCount > 0 && (
+                      <>
+                        {" · "}
+                        <span className="text-[rgb(var(--fit-skipped))]">
+                          {skippedCount} skipped
+                        </span>
+                      </>
+                    )}
+                    {" · "}
+                    {(day.exercises?.length ?? 0) - doneCount - skippedCount}{" "}
+                    pending
+                  </div>
+                )}
               </div>
               <Chevron open={isOpen} />
             </button>
@@ -99,7 +184,7 @@ export default function WorkoutTab({ plan }) {
             {isOpen && (
               <div className="border-t border-line-soft px-4 pb-4 pt-2 space-y-2">
                 {day.rest ? (
-                  <div className="text-center text-fg-muted text-sm py-8">
+                  <div className="text-center text-fg-dim text-sm py-8">
                     Rest day · recover well
                   </div>
                 ) : (
@@ -119,6 +204,7 @@ export default function WorkoutTab({ plan }) {
                         onSetsChange={(sets) => setSetsFor(ex.name, sets)}
                         notes={getNotesFor(ex.name)}
                         onNotesChange={(notes) => setNotesFor(ex.name, notes)}
+                        onStatusChange={refresh}
                         onOpenFocus={() =>
                           setFocusState({ dayKey, startIndex: i })
                         }
@@ -139,6 +225,23 @@ export default function WorkoutTab({ plan }) {
                         className="fit-input resize-none"
                       />
                     </div>
+
+                    {isToday && (
+                      <div className="pt-2">
+                        <button
+                          onClick={toggleSkipDay}
+                          className={`w-full min-h-[44px] rounded-full text-sm font-medium transition active:scale-[0.98] ${
+                            status === "skipped"
+                              ? "bg-[rgb(var(--fit-skipped))] text-white"
+                              : "border border-line text-fg-muted hover:text-[rgb(var(--fit-skipped))]"
+                          }`}
+                        >
+                          {status === "skipped"
+                            ? "Un-skip this day"
+                            : "Skip today's workout"}
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -156,7 +259,10 @@ export default function WorkoutTab({ plan }) {
           setSetsFor={setSetsFor}
           getNotesFor={getNotesFor}
           setNotesFor={setNotesFor}
-          onClose={() => setFocusState(null)}
+          onClose={() => {
+            setFocusState(null);
+            refresh();
+          }}
         />
       )}
     </div>

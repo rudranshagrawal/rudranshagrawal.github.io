@@ -1,7 +1,15 @@
 // Formatting helpers for WhatsApp message drafts, weekly summaries, and
 // AI context payloads. Pure functions, no side effects.
 
-import { allSessions, allMeals, getWeightLog, getCheckinHistory } from "./storage";
+import {
+  allSessions,
+  allMeals,
+  getWeightLog,
+  getCheckinHistory,
+  getSessionLog,
+  getMealLog,
+  dayStatus,
+} from "./storage";
 
 const DAY_NAMES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
@@ -137,4 +145,109 @@ export function prettyDate(iso) {
  */
 export function hasCheckinForWeek(weekNum) {
   return getCheckinHistory().some((c) => c.weekNumber === weekNum);
+}
+
+const DAY_NAMES_FOR_DATE = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+
+/**
+ * Greeting based on local time of day. Returns plain-text string.
+ */
+export function greeting(d = new Date()) {
+  const h = d.getHours();
+  if (h >= 4 && h < 11) return "Good morning";
+  if (h >= 11 && h < 17) return "Good afternoon";
+  if (h >= 17 && h < 21) return "Good evening";
+  return "Still up";
+}
+
+/**
+ * Given an ISO date, return the day name lowercase (e.g. "monday").
+ */
+export function dayKeyForISO(iso) {
+  return DAY_NAMES_FOR_DATE[new Date(iso + "T12:00:00").getDay()];
+}
+
+/**
+ * Iterate N days backwards from today, returning ISO date strings newest first.
+ */
+export function lastNDates(n, endDate = new Date()) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(endDate);
+    d.setDate(endDate.getDate() - i);
+    out.push(todayISO(d));
+  }
+  return out;
+}
+
+/**
+ * Monday-anchored week, returning { mondayISO, days: [iso...] } (Mon→Sun).
+ */
+export function currentWeekDays(today = new Date()) {
+  const dow = today.getDay(); // 0=Sun..6=Sat
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const mon = new Date(today);
+  mon.setDate(today.getDate() + mondayOffset);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    days.push(todayISO(d));
+  }
+  return { mondayISO: todayISO(mon), days };
+}
+
+/**
+ * A "tracked day" is any day where the user has SOME activity:
+ * weight logged, or any meal status, or any session entry.
+ * Returns the count of consecutive tracked days ending today (or yesterday
+ * if today has nothing yet — so the streak isn't broken until a full day
+ * passes with zero activity).
+ */
+export function activityStreak(today = new Date()) {
+  const weights = getWeightLog();
+  const weightDates = new Set(weights.map((w) => w.date));
+
+  function hasActivity(iso) {
+    if (weightDates.has(iso)) return true;
+    const session = getSessionLog(iso);
+    if (session && (session.exercises?.length > 0 || session.status)) return true;
+    const meals = getMealLog(iso);
+    if (meals && meals.length > 0) return true;
+    return false;
+  }
+
+  let streak = 0;
+  const todayIso = todayISO(today);
+  const todayActive = hasActivity(todayIso);
+
+  // If today has no activity yet, start counting from yesterday so the
+  // streak doesn't reset at midnight.
+  let start = todayActive ? 0 : 1;
+  for (let i = start; i < 400; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = todayISO(d);
+    if (hasActivity(iso)) streak++;
+    else break;
+  }
+  return streak;
+}
+
+/**
+ * Status summary for a given date, used by the week-strip dots.
+ * Returns one of: 'done' | 'partial' | 'skipped' | 'rest' | 'pending' | 'future'
+ */
+export function statusForDate({ plan, iso, today = todayISO() }) {
+  if (iso > today) return "future";
+  const dayKey = dayKeyForISO(iso);
+  return dayStatus({ workouts: plan.workouts, dayKey, date: iso });
 }
