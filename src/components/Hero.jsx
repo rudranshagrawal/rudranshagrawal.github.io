@@ -48,7 +48,7 @@ export default function Hero() {
           className="heading-display"
         >
           Software engineer building the systems behind{" "}
-          <span className="text-amber">AWS&apos;s GPU fleet</span>.
+          <span className="text-amber">Google Cloud&apos;s server fleet</span>.
           <span className="caret" />
         </motion.h1>
 
@@ -57,11 +57,11 @@ export default function Hero() {
           custom={4}
           className="mt-6 text-base sm:text-lg text-fg-dim leading-relaxed max-w-2xl"
         >
-          I write firmware for Baseboard Management Controllers on EC2 servers
-          with AMD and Nvidia GPUs — the layer that keeps AWS&apos;s accelerated
-          compute fleet healthy, observable, and cool. Before AWS I built
-          CAN-based motor control firmware at Milwaukee Tool. Purdue MS in
-          Computer Engineering, &apos;24.
+          I write OpenBMC firmware for Google Cloud&apos;s server fleet. Before
+          Google I wrote Baseboard Management Controller firmware for EC2
+          servers with AMD and Nvidia GPUs at AWS, and before that CAN-based
+          motor control firmware at Milwaukee Tool. Purdue MS in Computer
+          Engineering, &apos;24.
         </motion.p>
 
         <motion.div
@@ -106,7 +106,7 @@ export default function Hero() {
           <span className="pulse-dot" />
           <span className="label">currently</span>
           <span className="text-fg">
-            shipping trana for the app store · building bmc fw at aws
+            shipping trana for the app store · building openbmc fw at google cloud
           </span>
         </motion.div>
 

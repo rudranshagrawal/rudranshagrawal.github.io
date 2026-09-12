@@ -1,10 +1,19 @@
 const ROLES = [
   {
+    company: "google cloud",
+    role: "software engineer, gbmc",
+    location: "sunnyvale, ca",
+    dates: "sep 2026 — present",
+    current: true,
+    bullets: [
+      "working on openbmc firmware and platform bring-up for google cloud's server fleet.",
+    ],
+  },
+  {
     company: "amazon web services",
     role: "sde, hardware engineering — accelerated platforms",
     location: "cupertino, ca",
-    dates: "jul 2025 — present",
-    current: true,
+    dates: "jul 2025 — sep 2026",
     bullets: [
       "design and implement bmc firmware for ec2 servers with amd and nvidia gpus, enabling new product introduction (npi) for accelerated compute platforms.",
       "build pcie integration and custom telemetry systems for gpu health, asset monitoring, and automated vision reporting.",

@@ -39,18 +39,23 @@ const HELP = `available commands:
 
 tip: tab completes · up/down arrows recall history`;
 
-const ABOUT = `rudransh agrawal — software engineer @ aws.
+const ABOUT = `rudransh agrawal — software engineer @ google cloud (gbmc).
 
-working on bmc firmware for ec2 servers running amd and nvidia gpus
-out of cupertino. before aws, built can-based motor control firmware
-at milwaukee tool. purdue ms in computer engineering, '24.
+working on openbmc firmware for google cloud's server fleet out of
+sunnyvale. before google, built bmc firmware for ec2 servers running
+amd and nvidia gpus at aws, and before that can-based motor control
+firmware at milwaukee tool. purdue ms in computer engineering, '24.
 
 side projects span consumer health (trana), multi-agent ai systems
 (citation guard, orchestrator), and an ios travel app pitched to
 the madhya pradesh state government.`;
 
-const EXPERIENCE = `aws · sde, hardware engineering — accelerated platforms
-  cupertino, ca · jul 2025 — present
+const EXPERIENCE = `google cloud · software engineer, gbmc
+  sunnyvale, ca · sep 2026 — present
+  openbmc firmware and platform bring-up for google cloud's server fleet
+
+aws · sde, hardware engineering — accelerated platforms
+  cupertino, ca · jul 2025 — sep 2026
   bmc firmware for ec2 gpu servers · pcie telemetry · fan control
 
 milwaukee tool · firmware engineer i
@@ -169,7 +174,7 @@ export default function TerminalEasterEgg() {
     if (cmd === "help") return print(HELP);
     if (cmd === "whoami")
       return print(
-        "rudransh agrawal · sde @ aws · cupertino, ca · purdue ms '24"
+        "rudransh agrawal · swe @ google cloud · sunnyvale, ca · purdue ms '24"
       );
     if (cmd === "ls")
       return print(
